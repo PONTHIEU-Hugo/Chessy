@@ -4,7 +4,9 @@
 add_executable(Chessy_Lexer
       main.cpp
       Lexer.cpp
-      Token.cpp)
+      Token.cpp
+      Parser.cpp
+)
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET Chessy_Lexer PROPERTY CXX_STANDARD 20)
