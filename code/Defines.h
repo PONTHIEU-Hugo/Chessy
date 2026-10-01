@@ -17,9 +17,9 @@
 /// Using
 using str_view      = std::string_view;
 using str           = std::string;
-using i8            = std::uint8_t;
-using i16           = std::uint16_t;
-using i32           = std::uint32_t;
+using u8            = std::uint8_t;
+using u16           = std::uint16_t;
+using u32           = std::uint32_t;
 using size          = size_t;
 template<typename T>
 using vector        = std::vector<T>;

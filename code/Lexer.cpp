@@ -6,19 +6,19 @@ Lexer::Lexer()
     m_Identifier.emplace("bool", TokenType::_BOOL);
 
     m_Identifier.emplace("i8", TokenType::_I8);
-    m_Identifier.emplace("i8", TokenType::_I16);
-    m_Identifier.emplace("i8", TokenType::_I32);
-    m_Identifier.emplace("i8", TokenType::_I64);
+    m_Identifier.emplace("i16", TokenType::_I16);
+    m_Identifier.emplace("i32", TokenType::_I32);
+    m_Identifier.emplace("i64", TokenType::_I64);
 
-    m_Identifier.emplace("i8", TokenType::_U8);
-    m_Identifier.emplace("i8", TokenType::_U16);
-    m_Identifier.emplace("i8", TokenType::_U32);
-    m_Identifier.emplace("i8", TokenType::_U64);
+    m_Identifier.emplace("u8", TokenType::_U8);
+    m_Identifier.emplace("u16", TokenType::_U16);
+    m_Identifier.emplace("u32", TokenType::_U32);
+    m_Identifier.emplace("u64", TokenType::_U64);
 
-    m_Identifier.emplace("i8", TokenType::_BITBOARD);
-    m_Identifier.emplace("i8", TokenType::_PIECE);
-    m_Identifier.emplace("i8", TokenType::_POSITION);
-    m_Identifier.emplace("i8", TokenType::_MOVE);
+    m_Identifier.emplace("bitboard", TokenType::_BITBOARD);
+    m_Identifier.emplace("piece", TokenType::_PIECE);
+    m_Identifier.emplace("position", TokenType::_POSITION);
+    m_Identifier.emplace("move", TokenType::_MOVE);
 
     // Keywords
     m_Keyword.emplace("do", TokenType::_DO);
@@ -53,41 +53,6 @@ void Lexer::Tokenize()
         m_Start = m_Current;
         ScanToken();
     }
-    ////
-//    { m_Tokens.clear();
-//     str_view fileView(m_File);
-    
-//     Token current;
-//     current.line = 1;
-//     current.column = 1;
-
-//     bool canCreateToken = false;
-//     bool tokenCreated = false;
-//     i32 currentBegin = 0;
-//     size i = 0;
-//     while(i < fileView.size())
-//     {
-//         if(tokenCreated == true && canCreateToken == false)
-//         {
-//             tokenCreated = false;
-//             canCreateToken = true;
-//         }
-//         if(tokenCreated == true)
-//         {
-//             current.view = fileView.substr(currentBegin, i - currentBegin);
-//             currentBegin = i;
-//             std::cout << "Token for: " << current.view << std::endl;
-//             m_Tokens.push_back(current);
-//             current.view = "";
-//             current.globalType = GlobalTokenType::_LITTERAL;
-//             current.type = TokenType::_VALUE;
-//             canCreateToken = false;
-//             tokenCreated = false;
-//         }
-
-//         ScanToken();
-//     }
-//     m_Tokens.push_back(current);}
 }
 
 void Lexer::ScanToken()

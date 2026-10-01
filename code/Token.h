@@ -1,7 +1,7 @@
 #pragma once
 #include "Defines.h"
 
-enum class GlobalTokenType : i8
+enum class GlobalTokenType : u8
 {
     _LITTERAL,
     _IDENTIFIER,
@@ -10,7 +10,7 @@ enum class GlobalTokenType : i8
     _DELIMITOR    
 };
 
-enum class TokenType : i8
+enum class TokenType : u8
 {
     // Litterals
     _VALUE,
@@ -55,8 +55,8 @@ enum class TokenType : i8
 struct Token
 {
     str_view view;
-    i32 line;
-    i32 column;
+    u32 line;
+    u32 column;
     GlobalTokenType globalType;
     TokenType type;
 

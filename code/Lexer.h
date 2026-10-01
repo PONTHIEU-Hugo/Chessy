@@ -13,8 +13,8 @@ private:
 
     int m_Start;
     int m_Current;
-    i32 m_Line;
-    i32 m_Column;
+    u32 m_Line;
+    u32 m_Column;
 
 public:
     Lexer();
