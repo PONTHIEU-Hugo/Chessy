@@ -1,0 +1,24 @@
+func Test()
+{
+    return;
+}
+
+func Test_Parameters(i32 a)
+{
+    return;
+}
+
+func Test_Return(): string
+{
+    return "Work";
+}
+
+func Test_Parameters_Return(i32 a) : i32
+{
+    return a;
+}
+
+func main
+{
+
+}

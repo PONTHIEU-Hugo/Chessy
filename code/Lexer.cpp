@@ -23,6 +23,7 @@ Lexer::Lexer()
     // Keywords
     m_Keyword.emplace("do", TokenType::_DO);
     m_Keyword.emplace("while", TokenType::_WHILE);
+    m_Keyword.emplace("if", TokenType::_IF);
     m_Keyword.emplace("func", TokenType::_FUNC);
     m_Keyword.emplace("return", TokenType::_RETURN);
     m_Keyword.emplace("return", TokenType::_TRUE);
@@ -111,10 +112,11 @@ void Lexer::ScanToken()
         break;
     case '=':
         AddToken(GlobalTokenType::_OPERAND, (Match('=') == false ? TokenType::_EQUAL : TokenType::_EQUAL_OP));
+        break;
     case '/':
         if(Match('/') == false)
         {
-            while(Peek() != '\r' && !IsAtEnd())
+            while(Peek() != '\n' && !IsAtEnd())
                 NextChar();
         }
         else
@@ -149,6 +151,7 @@ void Lexer::ScanToken()
         break;
 
     default:
+        //std::cout << currentChar << std::endl;
         if(std::isdigit(currentChar))
             Number();
         else if(std::isalpha(currentChar))
@@ -206,7 +209,10 @@ void Lexer::String()
         NextChar();
     }
     if(IsAtEnd())
+    {
+        std::cout << "String";
         throw std::runtime_error("No end string token");
+    }
     
     NextChar();
     AddToken(GlobalTokenType::_DELIMITOR, TokenType::_DOUBLE_QUOTE);
@@ -222,7 +228,7 @@ void Lexer::Number()
 
 void Lexer::Symbol()
 {
-    while(std::isalnum(Peek()) && IsAtEnd() == false)
+    while((std::isalnum(Peek()) || Peek() == '_') && IsAtEnd() == false)
         NextChar();
 
     str word = m_File.substr(m_Start, m_Current - m_Start);

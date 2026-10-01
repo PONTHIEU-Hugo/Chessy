@@ -1,14 +1,32 @@
 #include "Lexer.h"
 
+
+
 int main()
 {
-    Lexer lex;
-    if(lex.ReadFile("../../../code/main.chessy") == false) std::cout << "alert";
-    lex.Tokenize();
-    vector<Token> tokens = lex.GetTokens();
-    for(Token& token : tokens) token.Print();
+    str _TestFiles[6]{
+    "../../../Test/Declaration.chessy",
+    "../../../Test/Math_Operation.chessy",
+    "../../../Test/Bool_Operation.chessy",
+    "../../../Test/Bina_Operation.chessy",
+    "../../../Test/Function.chessy",
+    "../../../Test/Loop.chessy"
+    };
 
-    std::cout << "End of " << tokens.size() << " token" << std::endl;
+    Lexer lex;
+    for(str& rTestPath : _TestFiles)
+    {
+        if(lex.ReadFile(rTestPath) == false)
+            std::runtime_error("Error reading test: " + rTestPath);
+
+        lex.Tokenize();
+        vector<Token>& rTokens = lex.GetTokens();
+
+        std::cout << std::endl;
+        for(Token& rToken : rTokens) rToken.Print();
+        std::cout << std::endl << "End of a total of " << rTokens.size() << " token for the file: " << rTestPath
+            << std::endl << "=====================================" << std::endl;
+    }
 
     return 0;
 }

@@ -37,6 +37,7 @@ enum class TokenType : u8
 
     // Keywords
     _DO, _WHILE,
+    _IF,
     _FUNC, _RETURN,
     _TRUE, _FALSE,
 
