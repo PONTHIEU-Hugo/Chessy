@@ -14,9 +14,7 @@ template <> struct ExpressionTraits<ExpressionType::_FUNCTION_DECLARATION>{ usin
 template <> struct ExpressionTraits<ExpressionType::_FUNCTION_CALL>       { using type = FunctionCallExpression; };
 template <> struct ExpressionTraits<ExpressionType::_PARAMETER>           { using type = ParameterExpression; };
 template <> struct ExpressionTraits<ExpressionType::_VARIABLE_DECLARATION>{ using type = VariableDeclarationExpression; };
-template <> struct ExpressionTraits<ExpressionType::_VARIABLE_ASSIGNMENT> { using type = VariableAssignmentExpression; };
-template <> struct ExpressionTraits<ExpressionType::_RETURN_STATEMENT>    { using type = ReturnStatementExpression; };
-template <> struct ExpressionTraits<ExpressionType::_STATEMENT>           { using type = StatementExpression; };
+template <> struct ExpressionTraits<ExpressionType::_RETURN>              { using type = ReturnStatementExpression; };
 
 template <ExpressionType K>
 typename ExpressionTraits<K>::type* ExpressionCast(Expression* e) {

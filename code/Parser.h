@@ -11,7 +11,7 @@ public:
 	void Parse(std::vector<Token> tokens);
 private:
 	Token& Consume(TokenType type);
-	Token& Peek();
+	Token& Peek(int indexOffset = 0);
 
 	ProgramExpression* ParseProgram();
 
@@ -23,17 +23,18 @@ private:
 	ParameterExpression* ParseParameter();
 
 	VariableDeclarationExpression* ParseVariableDeclaration();
-	VariableAssignmentExpression* ParseVariableAssignement();
 
 	TypeExpression* ParseType();
 	ReturnStatementExpression* ParseReturnStatement();
-	StatementExpression* ParseStatement();
 
 	Expression* ParseExpression(int minLeftBindingPower = 0);
 
+	Expression* ParsePrefix();
 	BindingPower GetBindingPower(Token& token);
 private:
 	std::vector<Token> m_tokens;
 	size_t m_tokenIndex = 0;
 	ProgramExpression* m_program = nullptr;
+
+	static un_set<TokenType> s_typeTokens;
 };

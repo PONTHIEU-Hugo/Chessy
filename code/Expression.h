@@ -14,12 +14,12 @@ struct ProgramExpression : Expression
 	{
 		type = ExpressionType::_PROGRAM;
 	}
+	~ProgramExpression() override
+	{
+		for (Expression* e : content) 
+			delete e;
+	}
 	std::vector<Expression*> content;
-};
-
-struct ReturnStatementExpression : Expression
-{
-	StatementExpression* statement;
 };
 
 struct IdentifierExpression : Expression
@@ -51,12 +51,22 @@ struct LiteralExpression : Expression
 
 struct UnaryExpression : Expression
 {
+	UnaryExpression(Token& tok, Expression* l) : token(tok), left(l)
+	{
+		type = ExpressionType::_UNARY;
+	}
+	~UnaryExpression() override { delete left; }
 	Token token;
 	Expression* left = nullptr;
 };
 
 struct BinaryExpression : Expression
 {
+	BinaryExpression(Token& tok, Expression* l, Expression* r) : token(tok), left(l), right(r)
+	{
+		type = ExpressionType::_BINARY;
+	}
+	~BinaryExpression() override { delete left; delete right; }
 	Token token;
 	Expression* left = nullptr;
 	Expression* right = nullptr;
@@ -68,6 +78,10 @@ struct BlockExpression : Expression
 	{
 		type = ExpressionType::_BLOCK;
 	}
+	~BlockExpression() override
+	{
+		for (Expression* e : content) delete e;
+	}
 	std::vector<Expression*> content;
 };
 
@@ -77,8 +91,9 @@ struct ParameterExpression : Expression
 	{
 		type = ExpressionType::_PARAMETER;
 	}
-	IdentifierExpression* name;
-	TypeExpression* paramType;
+	~ParameterExpression() override { delete name; delete paramType; }
+	IdentifierExpression* name = nullptr;
+	TypeExpression* paramType = nullptr;
 };
 
 struct FunctionDeclarationExpression : Expression
@@ -87,10 +102,17 @@ struct FunctionDeclarationExpression : Expression
 	{
 		type = ExpressionType::_FUNCTION_DECLARATION;
 	}
-	IdentifierExpression* functionName;
+	~FunctionDeclarationExpression() override
+	{
+		delete functionName;
+		for (ParameterExpression* p : parameters) delete p;
+		delete returnType;
+		delete content;
+	}
+	IdentifierExpression* functionName = nullptr;
 	std::vector<ParameterExpression*> parameters;
-	TypeExpression* returnType;
-	BlockExpression* content;
+	TypeExpression* returnType = nullptr;
+	BlockExpression* content = nullptr;
 };
 
 struct FunctionCallExpression : Expression
@@ -99,8 +121,13 @@ struct FunctionCallExpression : Expression
 	{
 		type = ExpressionType::_FUNCTION_CALL;
 	}
-	IdentifierExpression* name;
-	std::vector<StatementExpression*> arguments;
+	~FunctionCallExpression() override
+	{
+		delete name;
+		for (Expression* e : arguments) delete e;
+	}
+	IdentifierExpression* name = nullptr;
+	std::vector<Expression*> arguments;
 };
 
 struct VariableDeclarationExpression : Expression
@@ -109,22 +136,23 @@ struct VariableDeclarationExpression : Expression
 	{
 		type = ExpressionType::_VARIABLE_DECLARATION;
 	}
+	~VariableDeclarationExpression() override
+	{
+		delete varType;
+		delete name;
+		delete value;
+	}
 	TypeExpression* varType = nullptr;
 	IdentifierExpression* name = nullptr;
-	StatementExpression* value = nullptr;
+	Expression* value = nullptr;
 };
 
-struct VariableAssignmentExpression : Expression
+struct ReturnStatementExpression : Expression
 {
-	VariableAssignmentExpression()
+	ReturnStatementExpression()
 	{
-		type = ExpressionType::_VARIABLE_ASSIGNMENT;
+		type = ExpressionType::_RETURN;
 	}
-	IdentifierExpression* name;
-	StatementExpression* value;
-};
-
-struct StatementExpression : Expression
-{
-	Expression* expr = nullptr;
+	~ReturnStatementExpression() override { delete value; }
+	Expression* value = nullptr;
 };
