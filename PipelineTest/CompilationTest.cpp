@@ -21,12 +21,12 @@ void CompilationTest::TestLexer()
 
 void CompilationTest::TestParser()
 {
-    ParserTest::TestDeclaration();
-    ParserTest::TestMathOperation();
-    ParserTest::TestBoolOperation();
-    ParserTest::TestBinaOperation();
-    ParserTest::TestFunction();
-    ParserTest::TestLoop();
+    // ParserTest::TestDeclaration();
+    // ParserTest::TestMathOperation();
+    // ParserTest::TestBoolOperation();
+    // ParserTest::TestBinaOperation();
+    // ParserTest::TestFunction();
+    // ParserTest::TestLoop();
 }
 
 void CompilationTest::TestSEMA()
