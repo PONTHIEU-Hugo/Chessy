@@ -1,4 +1,4 @@
-func main
+func main()
 {
     bool test_bool = true;
     i8 test_i8 = 127;

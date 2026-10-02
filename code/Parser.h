@@ -8,7 +8,7 @@ class Parser
 public:
 	Parser();
 	~Parser();
-	void Parse(std::vector<Token> tokens);
+	void Parse(std::vector<Token>& tokens);
 	ProgramExpression* GetProgram();
 private:
 	Token& Consume(TokenType type);

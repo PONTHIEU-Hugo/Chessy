@@ -16,7 +16,7 @@ Parser::~Parser()
 {
 }
 
-void Parser::Parse(std::vector<Token> tokens)
+void Parser::Parse(std::vector<Token>& tokens)
 {
 	m_tokens = tokens;
     m_program = ParseProgram();

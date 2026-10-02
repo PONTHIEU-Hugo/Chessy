@@ -21,7 +21,7 @@ void CompilationTest::TestLexer()
 
 void CompilationTest::TestParser()
 {
-    // ParserTest::TestDeclaration();
+    ParserTest::TestDeclaration();
     // ParserTest::TestMathOperation();
     // ParserTest::TestBoolOperation();
     // ParserTest::TestBinaOperation();

@@ -82,7 +82,6 @@ void ParserTest::TestDeclaration()
     auto& stmts = func->content->content;
     CompilationTest::Assert(stmts.size() == 14, "Declaration: main should have 14 statements");
     if (stmts.size() != 14) return;
-
     auto* v0 = AssertVarDecl(stmts[0], TokenType::_BOOL, "test_bool", "stmt0 bool");
     if (v0) AssertLiteral(v0->value, TokenType::_TRUE, "stmt0 value true");
 
@@ -637,8 +636,8 @@ void ParserTest::TestFunction()
 
 void ParserTest::TestLoop()
 {
-    // TODO: le parser ne possède pas encore de noeud DoWhileExpression.
-    // Dès que do/while sera implémenté, remplacer ce test par une vérification de l'arbre.
+    // TODO: le parser ne possï¿½de pas encore de noeud DoWhileExpression.
+    // Dï¿½s que do/while sera implï¿½mentï¿½, remplacer ce test par une vï¿½rification de l'arbre.
     Lexer lex;
     CompilationTest::Assert(lex.ReadFile("PipelineTest/Loop.chessy") == true, "Loop.chessy can't be read");
     lex.Tokenize();
