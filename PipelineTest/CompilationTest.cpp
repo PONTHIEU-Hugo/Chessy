@@ -1,5 +1,5 @@
 #include "CompilationTest.h"
-
+#include "ParserTest.h"
 
 void CompilationTest::RunTest()
 {
@@ -20,7 +20,12 @@ void CompilationTest::TestLexer()
 
 void CompilationTest::TestParser()
 {
-    // TODO: Fill parser's Test
+    ParserTest::TestDeclaration();
+    ParserTest::TestMathOperation();
+    ParserTest::TestBoolOperation();
+    ParserTest::TestBinaOperation();
+    ParserTest::TestFunction();
+    ParserTest::TestLoop();
 }
 
 void CompilationTest::TestSEMA()

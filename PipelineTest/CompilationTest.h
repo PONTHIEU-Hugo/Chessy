@@ -1,7 +1,6 @@
 #pragma once
 #include "LexerTest.h"
 
-
 class CompilationTest
 {
 public:

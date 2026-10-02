@@ -1,5 +1,6 @@
 #include "LexerTest.h"
 #include "CompilationTest.h"
+#include "Lexer.h"
 
 void LexerTest::TestDeclaration()
 {

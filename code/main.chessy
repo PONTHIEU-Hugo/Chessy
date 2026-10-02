@@ -3,7 +3,7 @@ func Add(i32 a, i32 b) : i32
     return a + b; 
 }
 
-func Main 
+func main()
 {
     i32 x = 50;
     i32 y = 45;
