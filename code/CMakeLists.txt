@@ -3,9 +3,11 @@
 #
 add_executable(Chessy_Lexer
       main.cpp
-      Lexer.cpp
       Token.cpp
+      Lexer.cpp
       Parser.cpp
+      LexerTest.cpp
+      CompilationTest.cpp      
 )
 
 if (CMAKE_VERSION VERSION_GREATER 3.12)
