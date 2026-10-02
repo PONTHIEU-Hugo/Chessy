@@ -1,6 +1,7 @@
 add_executable(Chessy_Tests
     main.cpp
     LexerTest.cpp
+    ParserTest.cpp
     CompilationTest.cpp
 )
 target_link_libraries(Chessy_Tests PRIVATE chessy_core)

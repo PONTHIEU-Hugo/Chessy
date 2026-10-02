@@ -1,4 +1,5 @@
 #include "CompilationTest.h"
+#include "LexerTest.h"
 #include "ParserTest.h"
 
 void CompilationTest::RunTest()

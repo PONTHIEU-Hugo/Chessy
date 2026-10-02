@@ -9,6 +9,7 @@ public:
 	Parser();
 	~Parser();
 	void Parse(std::vector<Token> tokens);
+	ProgramExpression* GetProgram();
 private:
 	Token& Consume(TokenType type);
 	Token& Peek(int indexOffset = 0);

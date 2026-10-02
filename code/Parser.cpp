@@ -22,6 +22,11 @@ void Parser::Parse(std::vector<Token> tokens)
     m_program = ParseProgram();
 }
 
+ProgramExpression* Parser::GetProgram()
+{
+    return m_program;
+}
+
 Token& Parser::Consume(TokenType type)
 {
     if (m_tokenIndex >= static_cast<int>(m_tokens.size()))
