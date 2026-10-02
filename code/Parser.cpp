@@ -53,34 +53,119 @@ Expression* Parser::ParseDeclaration()
     }
 }
 
-BlockExpression* Parser::ParseBlock() //TODO
+BlockExpression* Parser::ParseBlock()
 {
-    return nullptr;
+    Consume(TokenType::_L_BRACE);
+
+    BlockExpression* block = new BlockExpression();
+
+    while (Peek().type != TokenType::_R_BRACE)
+    {
+        block->content.push_back(ParseStatement());
+    }
+
+    Consume(TokenType::_R_BRACE);
+    return block;
 }
 
-FunctionDeclarationExpression* Parser::ParseFunctionDeclaration() //TODO
+FunctionDeclarationExpression* Parser::ParseFunctionDeclaration()
 {
-    return nullptr;
+    FunctionDeclarationExpression* func = new FunctionDeclarationExpression();
+    Consume(TokenType::_FUNC);
+
+    func->functionName = new IdentifierExpression(Consume(TokenType::_SYMBOL));
+
+    Consume(TokenType::_L_PARENTHESE);
+
+    while (Peek().type != TokenType::_R_PARENTHESE)
+    {
+        func->parameters.push_back(ParseParameter());
+        Consume(TokenType::_COMMA);
+    }
+
+    Consume(TokenType::_R_PARENTHESE);
+
+    if (Peek().type == TokenType::_COLON)
+    {
+        Consume(TokenType::_COLON);
+        func->returnType = ParseType();
+    }
+
+    func->content = ParseBlock();
+
+    return func;
 }
 
-FunctionCallExpression* Parser::ParseFunctionCall() //TODO
+FunctionCallExpression* Parser::ParseFunctionCall()
 {
-    return nullptr;
+    FunctionCallExpression* call = new FunctionCallExpression();
+
+    call->name = new IdentifierExpression(Consume(TokenType::_SYMBOL));
+
+    Consume(TokenType::_L_PARENTHESE);
+
+    while (Peek().type != TokenType::_R_PARENTHESE)
+    {
+        call->arguments.push_back(ParseStatement());
+        Consume(TokenType::_COMMA);
+    }
+
+    Consume(TokenType::_R_PARENTHESE);
+
+    return call;
 }
 
-ParameterExpression* Parser::ParseParameters() //TODO
+ParameterExpression* Parser::ParseParameter() 
 {
-    return nullptr;
+    ParameterExpression* param = new ParameterExpression();
+    param->paramType = ParseType();
+    param->name = new IdentifierExpression(Consume(TokenType::_SYMBOL));
+    return param;
 }
 
-VariableDeclarationExpression* Parser::ParseVariableDeclaration() //TODO
+VariableDeclarationExpression* Parser::ParseVariableDeclaration()
 {
-    return nullptr;
+    VariableDeclarationExpression* variableDec = new VariableDeclarationExpression();
+    variableDec->varType = ParseType();
+    variableDec->name = new IdentifierExpression(Consume(TokenType::_SYMBOL));
+
+    if (Peek().type == TokenType::_EQUAL)
+    {
+        Consume(TokenType::_EQUAL);
+        variableDec->value = ParseStatement();
+    }
+
+    return variableDec;
 }
 
-VariableAssignmentExpression* Parser::ParseVariableAssignement() //TODO
+VariableAssignmentExpression* Parser::ParseVariableAssignement() 
 {
-    return nullptr;
+    VariableAssignmentExpression* varAssign = new VariableAssignmentExpression();
+
+    varAssign->name = new IdentifierExpression(Consume(TokenType::_SYMBOL));
+    Consume(TokenType::_EQUAL);
+    varAssign->value = ParseStatement();
+
+    return varAssign;
+}
+
+TypeExpression* Parser::ParseType()
+{
+    static un_set<TokenType> typeTokens = {
+        TokenType::_BOOL,
+        TokenType::_I8, TokenType::_I16, TokenType::_I32, TokenType::_I64,
+        TokenType::_U8, TokenType::_U16, TokenType::_U32, TokenType::_U64,
+        TokenType::_BITBOARD, TokenType::_PIECE,
+        TokenType::_POSITION, TokenType::_MOVE,
+    };
+
+    Token& type = Peek();
+    if (typeTokens.count(type.type) == 0)
+        throw std::runtime_error("unexpected token type");
+
+    TypeExpression* typeExpr = new TypeExpression(type);
+
+    return typeExpr;
 }
 
 ReturnStatementExpression* Parser::ParseReturnStatement() //TODO

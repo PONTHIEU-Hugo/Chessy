@@ -5,7 +5,6 @@
 struct Expression
 {
 	virtual ~Expression() = default;
-	Token token;
 	ExpressionType type;
 };
 
@@ -20,48 +19,74 @@ struct ProgramExpression : Expression
 
 struct ReturnStatementExpression : Expression
 {
+	StatementExpression* statement;
 };
 
 struct IdentifierExpression : Expression
 {
+	IdentifierExpression(Token& tok) : token(tok)
+	{
+		type = ExpressionType::_IDENTIFIER;
+	}
+	Token token;
 };
 
 struct TypeExpression : Expression
 {
+	TypeExpression(Token& tok) : token(tok)
+	{
+		type = ExpressionType::_TYPE;
+	}
+	Token token;
 };
 
 struct LiteralExpression : Expression
 {
-};
-
-struct ArgumentExpression : Expression
-{
+	LiteralExpression(Token& tok) : token(tok)
+	{
+		type = ExpressionType::_LITERAL;
+	}
+	Token token;
 };
 
 struct UnaryExpression : Expression
 {
+	Token token;
 	Expression* left = nullptr;
 };
 
 struct BinaryExpression : Expression
 {
+	Token token;
 	Expression* left = nullptr;
 	Expression* right = nullptr;
 };
 
 struct BlockExpression : Expression
 {
+	BlockExpression()
+	{
+		type = ExpressionType::_BLOCK;
+	}
 	std::vector<Expression*> content;
 };
 
 struct ParameterExpression : Expression
 {
+	ParameterExpression()
+	{
+		type = ExpressionType::_PARAMETER;
+	}
 	IdentifierExpression* name;
-	TypeExpression* type;
+	TypeExpression* paramType;
 };
 
 struct FunctionDeclarationExpression : Expression
 {
+	FunctionDeclarationExpression()
+	{
+		type = ExpressionType::_FUNCTION_DECLARATION;
+	}
 	IdentifierExpression* functionName;
 	std::vector<ParameterExpression*> parameters;
 	TypeExpression* returnType;
@@ -70,21 +95,33 @@ struct FunctionDeclarationExpression : Expression
 
 struct FunctionCallExpression : Expression
 {
+	FunctionCallExpression()
+	{
+		type = ExpressionType::_FUNCTION_CALL;
+	}
 	IdentifierExpression* name;
-	std::vector<ArgumentExpression*> arguments;
+	std::vector<StatementExpression*> arguments;
 };
 
 struct VariableDeclarationExpression : Expression
 {
-	TypeExpression* type = nullptr;
+	VariableDeclarationExpression()
+	{
+		type = ExpressionType::_VARIABLE_DECLARATION;
+	}
+	TypeExpression* varType = nullptr;
 	IdentifierExpression* name = nullptr;
-	Expression* value = nullptr;
+	StatementExpression* value = nullptr;
 };
 
 struct VariableAssignmentExpression : Expression
 {
+	VariableAssignmentExpression()
+	{
+		type = ExpressionType::_VARIABLE_ASSIGNMENT;
+	}
 	IdentifierExpression* name;
-	Expression* value;
+	StatementExpression* value;
 };
 
 struct StatementExpression : Expression

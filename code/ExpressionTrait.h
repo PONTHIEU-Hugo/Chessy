@@ -13,7 +13,6 @@ template <> struct ExpressionTraits<ExpressionType::_IDENTIFIER>          { usin
 template <> struct ExpressionTraits<ExpressionType::_FUNCTION_DECLARATION>{ using type = FunctionDeclarationExpression; };
 template <> struct ExpressionTraits<ExpressionType::_FUNCTION_CALL>       { using type = FunctionCallExpression; };
 template <> struct ExpressionTraits<ExpressionType::_PARAMETER>           { using type = ParameterExpression; };
-template <> struct ExpressionTraits<ExpressionType::_ARGUMENT>            { using type = ArgumentExpression; };
 template <> struct ExpressionTraits<ExpressionType::_VARIABLE_DECLARATION>{ using type = VariableDeclarationExpression; };
 template <> struct ExpressionTraits<ExpressionType::_VARIABLE_ASSIGNMENT> { using type = VariableAssignmentExpression; };
 template <> struct ExpressionTraits<ExpressionType::_RETURN_STATEMENT>    { using type = ReturnStatementExpression; };

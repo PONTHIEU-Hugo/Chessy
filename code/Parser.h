@@ -20,11 +20,12 @@ private:
 
 	FunctionDeclarationExpression* ParseFunctionDeclaration();
 	FunctionCallExpression* ParseFunctionCall();
-	ParameterExpression* ParseParameters();
+	ParameterExpression* ParseParameter();
 
 	VariableDeclarationExpression* ParseVariableDeclaration();
 	VariableAssignmentExpression* ParseVariableAssignement();
 
+	TypeExpression* ParseType();
 	ReturnStatementExpression* ParseReturnStatement();
 	StatementExpression* ParseStatement();
 

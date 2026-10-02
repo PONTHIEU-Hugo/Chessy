@@ -12,6 +12,7 @@
 #include <sstream>
 #include <vector>
 #include <unordered_map>
+#include <unordered_set>
 #include <cctype>
 
 /// Using
@@ -25,6 +26,7 @@ template<typename T>
 using vector        = std::vector<T>;
 template<typename K, typename V>
 using un_map        = std::unordered_map<K, V>; 
-
+template<typename T>
+using un_set = std::unordered_set<T>;
 
 #endif
