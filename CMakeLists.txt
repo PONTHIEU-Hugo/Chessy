@@ -1,14 +1,15 @@
-# CMakeList.txt : fichier projet CMake de niveau supérieur, effectuez une configuration globale
-# et incluez les sous-projets ici.
-#
 cmake_minimum_required (VERSION 3.10)
 
-# Activez Rechargement à chaud pour les compilateurs MSVC si cela est pris en charge.
+# Rechargement à chaud pour MSVC si pris en charge
 if (POLICY CMP0141)
   cmake_policy(SET CMP0141 NEW)
   set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "$<IF:$<AND:$<C_COMPILER_ID:MSVC>,$<CXX_COMPILER_ID:MSVC>>,$<$<CONFIG:Debug,RelWithDebInfo>:EditAndContinue>,$<$<CONFIG:Debug,RelWithDebInfo>:ProgramDatabase>>")
 endif()
 
-project ("Chessy_Lexer")
+project("Chessy_Lexer" CXX)
+
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_subdirectory(code)
+add_subdirectory(PipelineTest)

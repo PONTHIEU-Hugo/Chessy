@@ -4,7 +4,7 @@
 void LexerTest::TestDeclaration()
 {
     Lexer lex;
-    CompilationTest::Assert(lex.ReadFile("../../../Test/Declaration.chessy") == true, "Declaration.chessy can't be read");
+    CompilationTest::Assert(lex.ReadFile("PipelineTest/Declaration.chessy") == true, "Declaration.chessy can't be read");
     lex.Tokenize();
     vector<Token>& tokens = lex.GetTokens();
 
@@ -110,7 +110,7 @@ void LexerTest::TestDeclaration()
 void LexerTest::TestMathOperation()
 {
     Lexer lex;
-    CompilationTest::Assert(lex.ReadFile("../../../Test/Math_Operation.chessy") == true, "Math_Operation.chessy can't be read");
+    CompilationTest::Assert(lex.ReadFile("PipelineTest/Math_Operation.chessy") == true, "Math_Operation.chessy can't be read");
     lex.Tokenize();
     vector<Token>& tokens = lex.GetTokens();
 
@@ -191,7 +191,7 @@ void LexerTest::TestMathOperation()
 void LexerTest::TestBoolOperation()
 {
     Lexer lex;
-    CompilationTest::Assert(lex.ReadFile("../../../Test/Bool_Operation.chessy") == true, "Bool_Operation.chessy can't be read");
+    CompilationTest::Assert(lex.ReadFile("PipelineTest/Bool_Operation.chessy") == true, "Bool_Operation.chessy can't be read");
     lex.Tokenize();
     vector<Token>& tokens = lex.GetTokens();
 
@@ -318,7 +318,7 @@ void LexerTest::TestBoolOperation()
 void LexerTest::TestBinaOperation()
 {
     Lexer lex;
-    CompilationTest::Assert(lex.ReadFile("../../../Test/Bina_Operation.chessy") == true, "Bina_Operation.chessy can't be read");
+    CompilationTest::Assert(lex.ReadFile("PipelineTest/Bina_Operation.chessy") == true, "Bina_Operation.chessy can't be read");
     lex.Tokenize();
     vector<Token>& tokens = lex.GetTokens();
 
@@ -396,7 +396,7 @@ void LexerTest::TestBinaOperation()
 void LexerTest::TestFunction()
 {
     Lexer lex;
-    CompilationTest::Assert(lex.ReadFile("../../../Test/Function.chessy") == true, "Function.chessy can't be read");
+    CompilationTest::Assert(lex.ReadFile("PipelineTest/Function.chessy") == true, "Function.chessy can't be read");
     lex.Tokenize();
     vector<Token>& tokens = lex.GetTokens();
 
@@ -502,7 +502,7 @@ void LexerTest::TestFunction()
 void LexerTest::TestLoop()
 {
     Lexer lex;
-    CompilationTest::Assert(lex.ReadFile("../../../Test/Loop.chessy") == true, "Loop.chessy can't be read");
+    CompilationTest::Assert(lex.ReadFile("PipelineTest/Loop.chessy") == true, "Loop.chessy can't be read");
     lex.Tokenize();
     vector<Token>& tokens = lex.GetTokens();
 

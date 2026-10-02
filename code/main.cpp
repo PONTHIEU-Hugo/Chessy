@@ -1,10 +1,7 @@
 #include "Lexer.h"
-#include "CompilationTest.h"
-
 
 int main()
 {
-    CompilationTest::RunTest();
-
+    std::cout << "Main code" << std::endl;
     return 0;
 }

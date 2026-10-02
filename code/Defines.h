@@ -15,6 +15,7 @@
 #include <unordered_set>
 #include <cctype>
 #include <source_location>
+#include <filesystem>
 
 /// Using
 using str_view      = std::string_view;
@@ -32,5 +33,7 @@ template<typename K, typename V>
 using un_map        = std::unordered_map<K, V>; 
 template<typename T>
 using un_set = std::unordered_set<T>;
+
+const std::filesystem::path data = std::filesystem::path(PROJECT_ROOT);
 
 #endif

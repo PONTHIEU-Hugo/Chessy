@@ -1,17 +1,13 @@
-# CMakeList.txt : projet CMake pour Assembly, incluez la source et définissez
-# la logique spécifique au projet ici.
-#
-add_executable(Chessy_Lexer
-      main.cpp
-      Token.cpp
-      Lexer.cpp
-      Parser.cpp
-      LexerTest.cpp
-      CompilationTest.cpp      
+# Code commun : tout sauf main.cpp
+add_library(chessy_core STATIC
+    Token.cpp
+    Lexer.cpp
+    Parser.cpp
 )
+target_include_directories(chessy_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_compile_definitions(chessy_core PUBLIC
+    PROJECT_ROOT="${CMAKE_SOURCE_DIR}")
 
-if (CMAKE_VERSION VERSION_GREATER 3.12)
-  set_property(TARGET Chessy_Lexer PROPERTY CXX_STANDARD 20)
-endif()
-
-# TODO: Ajoutez des tests et installez des cibles si nécessaire.
+# Programme principal
+add_executable(Chessy_Lexer main.cpp)
+target_link_libraries(Chessy_Lexer PRIVATE chessy_core)
