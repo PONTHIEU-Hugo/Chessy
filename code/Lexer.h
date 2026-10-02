@@ -5,9 +5,10 @@
 class Lexer
 {
 private:
-    un_map<str, TokenType> m_Identifier;
-    un_map<str, TokenType> m_Keyword;
+    static un_map<str, TokenType> s_Identifier;
+    static un_map<str, TokenType> s_Keyword;
 
+private:
     str m_File;
     vector<Token> m_Tokens;
 
@@ -17,7 +18,7 @@ private:
     u32 m_Column;
 
 public:
-    Lexer();
+    Lexer() = default;
     ~Lexer() = default;
 
     bool ReadFile(str _path);

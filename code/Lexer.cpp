@@ -1,34 +1,36 @@
 #include "Lexer.h"
 
-Lexer::Lexer()
-{
-    // Identifiers
-    m_Identifier.emplace("bool", TokenType::_BOOL);
+un_map<str, TokenType> Lexer::s_Identifier{
+    std::pair<str, TokenType>("bool", TokenType::_BOOL),
 
-    m_Identifier.emplace("i8", TokenType::_I8);
-    m_Identifier.emplace("i16", TokenType::_I16);
-    m_Identifier.emplace("i32", TokenType::_I32);
-    m_Identifier.emplace("i64", TokenType::_I64);
+    std::pair<str, TokenType>("i8", TokenType::_I8),
+    std::pair<str, TokenType>("i16", TokenType::_I16),
+    std::pair<str, TokenType>("i32", TokenType::_I32),
+    std::pair<str, TokenType>("i64", TokenType::_I64),
+    
+    std::pair<str, TokenType>("u8", TokenType::_U8),
+    std::pair<str, TokenType>("u16", TokenType::_U16),
+    std::pair<str, TokenType>("u32", TokenType::_U32),
+    std::pair<str, TokenType>("u64", TokenType::_U64),
+    
+    std::pair<str, TokenType>("string", TokenType::_STRING_IDENTIFIER),
+    
+    std::pair<str, TokenType>("bitboard", TokenType::_BITBOARD),
+    std::pair<str, TokenType>("piece", TokenType::_PIECE),
+    std::pair<str, TokenType>("position", TokenType::_POSITION),
+    std::pair<str, TokenType>("move", TokenType::_MOVE),
+};
 
-    m_Identifier.emplace("u8", TokenType::_U8);
-    m_Identifier.emplace("u16", TokenType::_U16);
-    m_Identifier.emplace("u32", TokenType::_U32);
-    m_Identifier.emplace("u64", TokenType::_U64);
-
-    m_Identifier.emplace("bitboard", TokenType::_BITBOARD);
-    m_Identifier.emplace("piece", TokenType::_PIECE);
-    m_Identifier.emplace("position", TokenType::_POSITION);
-    m_Identifier.emplace("move", TokenType::_MOVE);
-
-    // Keywords
-    m_Keyword.emplace("do", TokenType::_DO);
-    m_Keyword.emplace("while", TokenType::_WHILE);
-    m_Keyword.emplace("if", TokenType::_IF);
-    m_Keyword.emplace("func", TokenType::_FUNC);
-    m_Keyword.emplace("return", TokenType::_RETURN);
-    m_Keyword.emplace("return", TokenType::_TRUE);
-    m_Keyword.emplace("return", TokenType::_FALSE);
-}
+un_map<str, TokenType> Lexer::s_Keyword{
+    std::pair<str, TokenType>("do", TokenType::_DO),
+    std::pair<str, TokenType>("while", TokenType::_WHILE),
+    std::pair<str, TokenType>("if", TokenType::_IF),
+    std::pair<str, TokenType>("func", TokenType::_FUNC),
+    std::pair<str, TokenType>("return", TokenType::_RETURN),
+    
+    std::pair<str, TokenType>("true", TokenType::_TRUE),
+    std::pair<str, TokenType>("false", TokenType::_FALSE)
+};
 
 bool Lexer::ReadFile(str _path)
 {
@@ -114,7 +116,7 @@ void Lexer::ScanToken()
         AddToken(GlobalTokenType::_OPERAND, (Match('=') == false ? TokenType::_EQUAL : TokenType::_EQUAL_OP));
         break;
     case '/':
-        if(Match('/') == false)
+        if(Match('/') == true)
         {
             while(Peek() != '\n' && !IsAtEnd())
                 NextChar();
@@ -138,20 +140,19 @@ void Lexer::ScanToken()
     case '<':
         isMatch = Match('=');
         if(isMatch == false)
-            AddToken(GlobalTokenType::_OPERAND, (Match('<') == false ? TokenType::_GREATER_THAN : TokenType::_L_SHIFT));
+            AddToken(GlobalTokenType::_OPERAND, (Match('<') == false ? TokenType::_LOWER_THAN : TokenType::_L_SHIFT));
         else
-            AddToken(GlobalTokenType::_OPERAND, TokenType::_GREATER_EQ_THAN);
+            AddToken(GlobalTokenType::_OPERAND, TokenType::_LOWER_EQ_THAN);
         break;
     case '>':
         isMatch = Match('=');
         if(isMatch == false)
-            AddToken(GlobalTokenType::_OPERAND, (Match('>') == false ? TokenType::_LOWER_THAN : TokenType::_R_SHIFT));
+            AddToken(GlobalTokenType::_OPERAND, (Match('>') == false ? TokenType::_GREATER_THAN : TokenType::_R_SHIFT));
         else
-            AddToken(GlobalTokenType::_OPERAND, TokenType::_LOWER_EQ_THAN);
+            AddToken(GlobalTokenType::_OPERAND, TokenType::_GREATER_EQ_THAN);
         break;
 
     default:
-        //std::cout << currentChar << std::endl;
         if(std::isdigit(currentChar))
             Number();
         else if(std::isalpha(currentChar))
@@ -209,13 +210,10 @@ void Lexer::String()
         NextChar();
     }
     if(IsAtEnd())
-    {
-        std::cout << "String";
         throw std::runtime_error("No end string token");
-    }
     
     NextChar();
-    AddToken(GlobalTokenType::_DELIMITOR, TokenType::_DOUBLE_QUOTE);
+    AddToken(GlobalTokenType::_LITTERAL, TokenType::_STRING_LITTERAL);
 }
 
 void Lexer::Number()
@@ -223,7 +221,7 @@ void Lexer::Number()
     while(std::isdigit(Peek()) && IsAtEnd() == false)
         NextChar();
 
-    AddToken(GlobalTokenType::_IDENTIFIER, TokenType::_VALUE);
+    AddToken(GlobalTokenType::_LITTERAL, TokenType::_VALUE);
 }
 
 void Lexer::Symbol()
@@ -232,10 +230,10 @@ void Lexer::Symbol()
         NextChar();
 
     str word = m_File.substr(m_Start, m_Current - m_Start);
-    if(m_Keyword.contains(word) == true)
-        AddToken(GlobalTokenType::_KEYWORD, m_Keyword[word]);
-    else if(m_Identifier.contains(word) == true)
-        AddToken(GlobalTokenType::_IDENTIFIER, m_Identifier[word]);
+    if(s_Keyword.contains(word) == true)
+        AddToken(GlobalTokenType::_KEYWORD, s_Keyword[word]);
+    else if(s_Identifier.contains(word) == true)
+        AddToken(GlobalTokenType::_IDENTIFIER, s_Identifier[word]);
     else
         AddToken(GlobalTokenType::_IDENTIFIER, TokenType::_SYMBOL);    
 }

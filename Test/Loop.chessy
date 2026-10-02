@@ -3,5 +3,5 @@ func main
     i8 test = 1;
     do {
         test = test + 1;
-    } while(test < 5)
+    } while(test < 5);
 }

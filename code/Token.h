@@ -14,7 +14,7 @@ enum class TokenType : u8
 {
     // Litterals
     _VALUE,
-    _STRING,
+    _STRING_LITTERAL,
 
     // Identifiers
     _SYMBOL,
@@ -22,6 +22,7 @@ enum class TokenType : u8
     _BOOL,
     _I8, _I16, _I32, _I64,
     _U8, _U16, _U32, _U64,
+    _STRING_IDENTIFIER,
     _BITBOARD, _PIECE,
     _POSITION, _MOVE,
 
