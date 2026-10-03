@@ -11,3 +11,7 @@ target_compile_definitions(chessy_core PUBLIC
 # Programme principal
 add_executable(Chessy_Lexer main.cpp)
 target_link_libraries(Chessy_Lexer PRIVATE chessy_core)
+
+set_target_properties(Chessy_Lexer PROPERTIES
+    VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
+)

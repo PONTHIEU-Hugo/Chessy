@@ -636,23 +636,58 @@ void ParserTest::TestFunction()
 
 void ParserTest::TestLoop()
 {
-    // TODO: le parser ne poss�de pas encore de noeud DoWhileExpression.
-    // D�s que do/while sera impl�ment�, remplacer ce test par une v�rification de l'arbre.
     Lexer lex;
     CompilationTest::Assert(lex.ReadFile("PipelineTest/Loop.chessy") == true, "Loop.chessy can't be read");
     lex.Tokenize();
     vector<Token>& tokens = lex.GetTokens();
 
     Parser parser;
-    bool thrown = false;
-    try
+    parser.Parse(tokens);
+
+    ProgramExpression* program = parser.GetProgram();
+    auto* func = GetSingleMainFunction(program, "Loop.chessy: program is null");
+    if (!func) return;
+
+    auto& stmts = func->content->content;
+    CompilationTest::Assert(stmts.size() == 2, "Loop: main should have 2 statements");
+    if (stmts.size() != 2) return;
+
+    // i8 test = 1;
+    auto* v0 = AssertVarDecl(stmts[0], TokenType::_I8, "test", "stmt0 test");
+    if (v0) AssertLiteral(v0->value, TokenType::_VALUE, "stmt0 value");
+
+    // do { test = test + 1; } while (test < 5);
+    auto* doWhile = ExpressionCast<ExpressionType::_DO_WHILE>(stmts[1]);
+    CompilationTest::Assert(doWhile != nullptr, "stmt1 should be a do/while");
+    if (!doWhile) return;
+
+    // --- Block : { test = test + 1; } ---
+    CompilationTest::Assert(doWhile->block != nullptr, "do/while block");
+    if (doWhile->block)
     {
-        parser.Parse(tokens);
-    }
-    catch (const std::runtime_error&)
-    {
-        thrown = true;
+        auto& blockStmts = doWhile->block->content;
+        CompilationTest::Assert(blockStmts.size() == 1, "do/while body should have 1 stmt");
+        if (blockStmts.size() == 1)
+        {
+            auto* assign = AssertBinary(blockStmts[0], TokenType::_EQUAL, "body assign");
+            if (assign)
+            {
+                AssertIdentifier(assign->left, "test", "body assign left");
+                auto* add = AssertBinary(assign->right, TokenType::_ADD, "body add");
+                if (add)
+                {
+                    AssertIdentifier(add->left, "test", "body add left");
+                    AssertLiteral(add->right, TokenType::_VALUE, "body add right");
+                }
+            }
+        }
     }
 
-    CompilationTest::Assert(thrown, "Parser should throw on unsupported do/while for now");
+    // --- Condition : test < 5 ---
+    auto* cond = AssertBinary(doWhile->condition, TokenType::_LOWER_THAN, "do/while condition");
+    if (cond)
+    {
+        AssertIdentifier(cond->left, "test", "condition left");
+        AssertLiteral(cond->right, TokenType::_VALUE, "condition right");
+    }
 }
