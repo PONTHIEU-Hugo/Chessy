@@ -1,4 +1,4 @@
-func main
+func main()
 {
     i32 tester1 = 5;
     i32 tester2 = 2;

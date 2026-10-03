@@ -36,7 +36,12 @@ bool Lexer::ReadFile(str _path)
 {
     std::ifstream file(_path, std::ios::binary);
     if(!file)
+    {
+        std::cerr << "couldn't read file: "
+              << std::filesystem::absolute(_path).string()
+              << std::endl;
         return false;
+    }
     std::ostringstream string;
     string << file.rdbuf();
     m_File = string.str();

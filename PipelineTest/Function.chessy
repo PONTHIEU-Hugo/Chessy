@@ -18,7 +18,7 @@ func Test_Parameters_Return(i32 a) : i32
     return a;
 }
 
-func main
+func main()
 {
     Test();
     i32 value = 5;

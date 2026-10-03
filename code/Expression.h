@@ -156,3 +156,56 @@ struct ReturnStatementExpression : Expression
 	~ReturnStatementExpression() override { delete value; }
 	Expression* value = nullptr;
 };
+
+struct DoWhileExpression : Expression 
+{
+	DoWhileExpression()
+	{
+		type = ExpressionType::_DO_WHILE;
+	}
+	~DoWhileExpression()
+	{
+		delete block;
+		delete condition;
+	}
+	BlockExpression* block;
+	Expression* condition;
+};
+
+struct VariableAssignment : Expression 
+{
+	VariableAssignment()
+	{
+		type = ExpressionType::_VARIABLE_ASSIGNMENT;
+	}
+	~VariableAssignment()
+	{
+		delete variable;
+		delete value;
+	}
+	IdentifierExpression* variable;
+	Expression* value;
+};
+
+struct IfExpression : Expression
+{
+	IfExpression()
+	{
+		type = ExpressionType::_IF;
+	}
+	~IfExpression(){
+		delete condition;
+		delete block;
+	}
+	Expression* condition;
+	BlockExpression* block;
+};
+
+struct CommentExpression : Expression 
+{
+	CommentExpression()
+	{
+		type = ExpressionType::_COMMENT;
+	}
+	std::string comment;
+};

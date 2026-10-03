@@ -11,8 +11,8 @@ public:
 	void Parse(std::vector<Token>& tokens);
 	ProgramExpression* GetProgram();
 private:
-	Token& Consume(TokenType type);
-	Token& Peek(int indexOffset = 0);
+	Token& Consume(TokenType type, bool jumpLineToken = true);
+	Token& Peek(int indexOffset = 0, bool jumpLineToken = true);
 
 	ProgramExpression* ParseProgram();
 
@@ -27,6 +27,9 @@ private:
 
 	TypeExpression* ParseType();
 	ReturnStatementExpression* ParseReturnStatement();
+	DoWhileExpression* ParseDoWhile();
+	IfExpression* ParseIf();
+	CommentExpression* ParseComment();
 
 	Expression* ParseExpression(int minLeftBindingPower = 0);
 
@@ -38,4 +41,5 @@ private:
 	ProgramExpression* m_program = nullptr;
 
 	static un_set<TokenType> s_typeTokens;
+	static un_set<TokenType> s_lineTokens;
 };

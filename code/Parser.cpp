@@ -1,11 +1,15 @@
 #include "Parser.h"
 
 un_set<TokenType> Parser::s_typeTokens = {
-    TokenType::_BOOL,
+    TokenType::_BOOL, TokenType::_STRING_IDENTIFIER,
     TokenType::_I8, TokenType::_I16, TokenType::_I32, TokenType::_I64,
     TokenType::_U8, TokenType::_U16, TokenType::_U32, TokenType::_U64,
     TokenType::_BITBOARD, TokenType::_PIECE,
     TokenType::_POSITION, TokenType::_MOVE,
+};
+
+un_set<TokenType> Parser::s_lineTokens = {
+    TokenType::_END_LINE, TokenType::_CR, TokenType::_LF
 };
 
 Parser::Parser()
@@ -19,7 +23,14 @@ Parser::~Parser()
 void Parser::Parse(std::vector<Token>& tokens)
 {
 	m_tokens = tokens;
-    m_program = ParseProgram();
+    try
+    {
+        m_program = ParseProgram();
+    }
+    catch (const std::exception& e)
+    {
+        std::cerr << "Parse error: " << e.what() << std::endl;
+    }
 }
 
 ProgramExpression* Parser::GetProgram()
@@ -27,23 +38,38 @@ ProgramExpression* Parser::GetProgram()
     return m_program;
 }
 
-Token& Parser::Consume(TokenType type)
+Token& Parser::Consume(TokenType type, bool jumpLineToken)
 {
     if (m_tokenIndex >= static_cast<int>(m_tokens.size()))
-        throw std::runtime_error("token out of range");
+        throw std::runtime_error("token out of range parser.Consume()");
+
     Token& t = m_tokens[m_tokenIndex];
+
+    if (jumpLineToken && s_lineTokens.count(t.type))
+    {
+        m_tokenIndex++;
+        return Consume(type,true);
+    }
+
     if (t.type != type)
-        throw std::runtime_error("unexpected token type");
+        throw std::runtime_error("unexpected token type got : " + std::to_string((int)t.type) + "expected : " + std::to_string((int)type));
     m_tokenIndex++;
     return t;
 }
 
-Token& Parser::Peek(int indexOffset)
+Token& Parser::Peek(int indexOffset, bool jumpLineToken)
 {
-    if (m_tokenIndex + indexOffset >= static_cast<int>(m_tokens.size()))
-        throw std::runtime_error("token out of range");
-    Token& t = m_tokens[m_tokenIndex + indexOffset];
-    return t;
+    int i = m_tokenIndex + indexOffset;
+
+    while (jumpLineToken && i < static_cast<int>(m_tokens.size()) && s_lineTokens.count(m_tokens[i].type))
+    {
+        i++;
+    }
+
+    if (i >= static_cast<int>(m_tokens.size()))
+        throw std::runtime_error("token out of range in parser.Peek()");
+
+    return m_tokens[i];
 }
 
 ProgramExpression* Parser::ParseProgram()
@@ -63,6 +89,7 @@ Expression* Parser::ParseDeclaration()
     switch (token.type)
     {
     case TokenType::_FUNC: return ParseFunctionDeclaration();
+    case TokenType::_COMMENTARY: return ParseComment();
     default:
     {
         Expression* expr = ParseVariableDeclaration();
@@ -80,9 +107,12 @@ BlockExpression* Parser::ParseBlock()
 
     while (Peek().type != TokenType::_R_BRACE)
     {
-        Expression* stmt = ParseExpression();
-        Consume(TokenType::_SEMI_COLON);
-        block->content.push_back(stmt);
+        Expression* expr = ParseExpression();
+        
+        if (expr->type != ExpressionType::_IF && expr->type != ExpressionType::_COMMENT)
+            Consume(TokenType::_SEMI_COLON);
+
+        block->content.push_back(expr);
     }
 
     Consume(TokenType::_R_BRACE);
@@ -171,7 +201,7 @@ TypeExpression* Parser::ParseType()
 {
     Token& type = Peek();
     if (s_typeTokens.count(type.type) == 0)
-        throw std::runtime_error("unexpected token type");
+        throw std::runtime_error("unexpected token type got : " + std::string(type.view) + " which is not a valid type");
 
     TypeExpression* typeExpr = new TypeExpression(type);
     Consume(type.type);
@@ -190,13 +220,57 @@ ReturnStatementExpression* Parser::ParseReturnStatement()
     return returnStatement;
 }
 
+DoWhileExpression* Parser::ParseDoWhile()
+{
+    DoWhileExpression* doWhile = new DoWhileExpression();
+    Consume(TokenType::_DO);
+    doWhile->block = ParseBlock();
+    Consume(TokenType::_WHILE);
+    Consume(TokenType::_L_PARENTHESE);
+    doWhile->condition = ParseExpression();
+    Consume(TokenType::_R_PARENTHESE);
+    return doWhile;
+}
+
+IfExpression* Parser::ParseIf()
+{
+    IfExpression* ifExpression = new IfExpression();
+
+    Consume(TokenType::_IF);
+    Consume(TokenType::_L_PARENTHESE);
+    ifExpression->condition = ParseExpression();
+    Consume(TokenType::_R_PARENTHESE);
+    ifExpression->block = ParseBlock();
+
+    return ifExpression;
+}
+
+CommentExpression* Parser::ParseComment()
+{
+    CommentExpression* comment = new CommentExpression();
+    comment->comment = "";
+
+    Consume(TokenType::_COMMENTARY);
+
+    while (Peek().type != TokenType::_END_LINE)
+    {
+        Token& tok = Peek();
+        comment->comment += std::string(tok.view);
+        Consume(tok.type);
+    }
+
+    Consume(TokenType::_END_LINE);
+
+    return comment;
+}
+
 Expression* Parser::ParseExpression(int minLeftBindingPower)
 {
     
     Expression* left = ParsePrefix();
     while (m_tokenIndex < static_cast<int>(m_tokens.size()))
     {
-        Token token = m_tokens[m_tokenIndex];
+        Token& token = m_tokens[m_tokenIndex];
         BindingPower bindingPower = GetBindingPower(token);
         if (bindingPower.left < minLeftBindingPower || bindingPower.left == 0)
             break;
@@ -212,6 +286,12 @@ Expression* Parser::ParsePrefix()
     Token& token = Peek();
 
     if (token.globalType == GlobalTokenType::_LITTERAL)
+    {
+        Consume(token.type);
+        return new LiteralExpression(token);
+    }
+
+    if (token.globalType == GlobalTokenType::_KEYWORD && (token.type == TokenType::_TRUE || token.type == TokenType::_FALSE))
     {
         Consume(token.type);
         return new LiteralExpression(token);
@@ -234,6 +314,21 @@ Expression* Parser::ParsePrefix()
         return inner;
     }
 
+    if (token.type == TokenType::_DO)
+    {
+        return ParseDoWhile();
+    }
+
+    if (token.type == TokenType::_COMMENTARY)
+    {
+        return ParseComment();
+    }
+
+    if (token.type == TokenType::_IF)
+    {
+        return ParseIf();
+    }
+
     if (s_typeTokens.count(token.type) && Peek(1).type == TokenType::_SYMBOL)
     {
         return ParseVariableDeclaration();
@@ -244,14 +339,14 @@ Expression* Parser::ParsePrefix()
         return ParseReturnStatement();
     }
 
-    if (token.globalType == GlobalTokenType::_OPERAND)
+    if (token.type == TokenType::_NOT_OP || token.type == TokenType::_SUB || token.type == TokenType::_ADD)
     {
         Consume(token.type);
         Expression* operand = ParseExpression(20);
         return new UnaryExpression(token, operand);
     }
 
-    throw std::runtime_error("expected expression");
+    throw std::runtime_error("parser couldn't parse token " + std::string(token.view) + " as expression");
 }
 
 BindingPower Parser::GetBindingPower(Token& token)
@@ -281,6 +376,7 @@ BindingPower Parser::GetBindingPower(Token& token)
         case TokenType::_DIV:
         case TokenType::_MOD:              return { 13, 14 };  
         case TokenType::_POW:              return { 14, 14 };  
+        case TokenType::_NOT_OP:           return { 15, 15 };  
         default:                           return { 0, 0 };
         }
 
