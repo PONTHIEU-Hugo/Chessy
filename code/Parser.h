@@ -24,6 +24,7 @@ private:
 	ParameterExpression* ParseParameter();
 
 	VariableDeclarationExpression* ParseVariableDeclaration();
+	VariableAssignmentExpression* ParseVariableAssignment();
 
 	TypeExpression* ParseType();
 	ReturnStatementExpression* ParseReturnStatement();

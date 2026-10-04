@@ -45,6 +45,15 @@ VariableDeclarationExpression* ParserTest::AssertVarDecl(Expression* e, TokenTyp
     return var;
 }
 
+VariableAssignmentExpression* ParserTest::AssertVarAssign(Expression* e, const char* name, const char* msg)
+{
+    auto* var = ExpressionCast<ExpressionType::_VARIABLE_ASSIGNMENT>(e);
+    CompilationTest::Assert(var != nullptr, msg);
+    if (!var) return nullptr;
+    AssertIdentifier(var->name, name, msg);
+    return var;
+}
+
 FunctionDeclarationExpression* ParserTest::GetSingleMainFunction(ProgramExpression* program, const char* file)
 {
     CompilationTest::Assert(program != nullptr, file);
@@ -160,11 +169,10 @@ void ParserTest::TestMathOperation()
         }
     }
 
-    auto* assign3 = AssertBinary(stmts[3], TokenType::_EQUAL, "stmt3 assign");
+    auto* assign3 = AssertVarAssign(stmts[3], "result", "stmt3 assign");
     if (assign3)
     {
-        AssertIdentifier(assign3->left, "result", "stmt3 left");
-        auto* sub = AssertBinary(assign3->right, TokenType::_SUB, "stmt3 sub");
+        auto* sub = AssertBinary(assign3->value, TokenType::_SUB, "stmt3 sub");
         if (sub)
         {
             AssertIdentifier(sub->left, "tester1", "stmt3 sub left");
@@ -172,11 +180,10 @@ void ParserTest::TestMathOperation()
         }
     }
 
-    auto* assign4 = AssertBinary(stmts[4], TokenType::_EQUAL, "stmt4 assign");
+    auto* assign4 = AssertVarAssign(stmts[4], "result", "stmt4 assign");
     if (assign4)
     {
-        AssertIdentifier(assign4->left, "result", "stmt4 left");
-        auto* mul = AssertBinary(assign4->right, TokenType::_MUL, "stmt4 mul");
+        auto* mul = AssertBinary(assign4->value, TokenType::_MUL, "stmt4 mul");
         if (mul)
         {
             AssertIdentifier(mul->left, "tester1", "stmt4 mul left");
@@ -184,11 +191,10 @@ void ParserTest::TestMathOperation()
         }
     }
 
-    auto* assign5 = AssertBinary(stmts[5], TokenType::_EQUAL, "stmt5 assign");
+    auto* assign5 = AssertVarAssign(stmts[5], "result", "stmt5 assign");
     if (assign5)
     {
-        AssertIdentifier(assign5->left, "result", "stmt5 left");
-        auto* pow = AssertBinary(assign5->right, TokenType::_POW, "stmt5 pow");
+        auto* pow = AssertBinary(assign5->value, TokenType::_POW, "stmt5 pow");
         if (pow)
         {
             AssertIdentifier(pow->left, "tester1", "stmt5 pow left");
@@ -196,11 +202,10 @@ void ParserTest::TestMathOperation()
         }
     }
 
-    auto* assign6 = AssertBinary(stmts[6], TokenType::_EQUAL, "stmt6 assign");
+    auto* assign6 = AssertVarAssign(stmts[6], "result", "stmt6 assign");
     if (assign6)
     {
-        AssertIdentifier(assign6->left, "result", "stmt6 left");
-        auto* div = AssertBinary(assign6->right, TokenType::_DIV, "stmt6 div");
+        auto* div = AssertBinary(assign6->value, TokenType::_DIV, "stmt6 div");
         if (div)
         {
             AssertIdentifier(div->left, "result", "stmt6 div left");
@@ -208,11 +213,10 @@ void ParserTest::TestMathOperation()
         }
     }
 
-    auto* assign7 = AssertBinary(stmts[7], TokenType::_EQUAL, "stmt7 assign");
+    auto* assign7 = AssertVarAssign(stmts[7], "result", "stmt7 assign");
     if (assign7)
     {
-        AssertIdentifier(assign7->left, "result", "stmt7 left");
-        auto* mod = AssertBinary(assign7->right, TokenType::_MOD, "stmt7 mod");
+        auto* mod = AssertBinary(assign7->value, TokenType::_MOD, "stmt7 mod");
         if (mod)
         {
             auto* mul = AssertBinary(mod->left, TokenType::_MUL, "stmt7 mul");
@@ -258,11 +262,10 @@ void ParserTest::TestBoolOperation()
         }
     }
 
-    auto* assign3 = AssertBinary(stmts[3], TokenType::_EQUAL, "stmt3 assign");
+    auto* assign3 = AssertVarAssign(stmts[3], "booleans", "stmt3 assign");
     if (assign3)
     {
-        AssertIdentifier(assign3->left, "booleans", "stmt3 left");
-        auto* neq = AssertBinary(assign3->right, TokenType::_NOT_EQUAL_OP, "stmt3 not equal");
+        auto* neq = AssertBinary(assign3->value, TokenType::_NOT_EQUAL_OP, "stmt3 not equal");
         if (neq)
         {
             AssertIdentifier(neq->left, "tester1", "stmt3 left");
@@ -270,11 +273,10 @@ void ParserTest::TestBoolOperation()
         }
     }
 
-    auto* assign4 = AssertBinary(stmts[4], TokenType::_EQUAL, "stmt4 assign");
+    auto* assign4 = AssertVarAssign(stmts[4], "booleans", "stmt4 assign");
     if (assign4)
     {
-        AssertIdentifier(assign4->left, "booleans", "stmt4 left");
-        auto* lt = AssertBinary(assign4->right, TokenType::_LOWER_THAN, "stmt4 lower");
+        auto* lt = AssertBinary(assign4->value, TokenType::_LOWER_THAN, "stmt4 lower");
         if (lt)
         {
             AssertIdentifier(lt->left, "tester1", "stmt4 left");
@@ -282,11 +284,10 @@ void ParserTest::TestBoolOperation()
         }
     }
 
-    auto* assign5 = AssertBinary(stmts[5], TokenType::_EQUAL, "stmt5 assign");
+    auto* assign5 = AssertVarAssign(stmts[5], "booleans", "stmt5 assign");
     if (assign5)
     {
-        AssertIdentifier(assign5->left, "booleans", "stmt5 left");
-        auto* le = AssertBinary(assign5->right, TokenType::_LOWER_EQ_THAN, "stmt5 lower eq");
+        auto* le = AssertBinary(assign5->value, TokenType::_LOWER_EQ_THAN, "stmt5 lower eq");
         if (le)
         {
             AssertIdentifier(le->left, "tester1", "stmt5 left");
@@ -294,11 +295,10 @@ void ParserTest::TestBoolOperation()
         }
     }
 
-    auto* assign6 = AssertBinary(stmts[6], TokenType::_EQUAL, "stmt6 assign");
+    auto* assign6 = AssertVarAssign(stmts[6], "booleans", "stmt6 assign");
     if (assign6)
     {
-        AssertIdentifier(assign6->left, "booleans", "stmt6 left");
-        auto* gt = AssertBinary(assign6->right, TokenType::_GREATER_THAN, "stmt6 greater");
+        auto* gt = AssertBinary(assign6->value, TokenType::_GREATER_THAN, "stmt6 greater");
         if (gt)
         {
             AssertIdentifier(gt->left, "tester1", "stmt6 left");
@@ -306,11 +306,10 @@ void ParserTest::TestBoolOperation()
         }
     }
 
-    auto* assign7 = AssertBinary(stmts[7], TokenType::_EQUAL, "stmt7 assign");
+    auto* assign7 = AssertVarAssign(stmts[7], "booleans", "stmt7 assign");
     if (assign7)
     {
-        AssertIdentifier(assign7->left, "booleans", "stmt7 left");
-        auto* ge = AssertBinary(assign7->right, TokenType::_GREATER_EQ_THAN, "stmt7 greater eq");
+        auto* ge = AssertBinary(assign7->value, TokenType::_GREATER_EQ_THAN, "stmt7 greater eq");
         if (ge)
         {
             AssertIdentifier(ge->left, "tester1", "stmt7 left");
@@ -318,11 +317,10 @@ void ParserTest::TestBoolOperation()
         }
     }
 
-    auto* assign8 = AssertBinary(stmts[8], TokenType::_EQUAL, "stmt8 assign");
+    auto* assign8 = AssertVarAssign(stmts[8], "booleans", "stmt8 assign");
     if (assign8)
     {
-        AssertIdentifier(assign8->left, "booleans", "stmt8 left");
-        auto* andOp = AssertBinary(assign8->right, TokenType::_AND_OP, "stmt8 and");
+        auto* andOp = AssertBinary(assign8->value, TokenType::_AND_OP, "stmt8 and");
         if (andOp)
         {
             AssertLiteral(andOp->left, TokenType::_TRUE, "stmt8 left true");
@@ -330,11 +328,10 @@ void ParserTest::TestBoolOperation()
         }
     }
 
-    auto* assign9 = AssertBinary(stmts[9], TokenType::_EQUAL, "stmt9 assign");
+    auto* assign9 = AssertVarAssign(stmts[9], "booleans", "stmt9 assign");
     if (assign9)
     {
-        AssertIdentifier(assign9->left, "booleans", "stmt9 left");
-        auto* andOp = AssertBinary(assign9->right, TokenType::_AND_OP, "stmt9 and");
+        auto* andOp = AssertBinary(assign9->value, TokenType::_AND_OP, "stmt9 and");
         if (andOp)
         {
             AssertLiteral(andOp->left, TokenType::_TRUE, "stmt9 left true");
@@ -342,11 +339,10 @@ void ParserTest::TestBoolOperation()
         }
     }
 
-    auto* assign10 = AssertBinary(stmts[10], TokenType::_EQUAL, "stmt10 assign");
+    auto* assign10 = AssertVarAssign(stmts[10], "booleans", "stmt10 assign");
     if (assign10)
     {
-        AssertIdentifier(assign10->left, "booleans", "stmt10 left");
-        auto* andOp = AssertBinary(assign10->right, TokenType::_AND_OP, "stmt10 and");
+        auto* andOp = AssertBinary(assign10->value, TokenType::_AND_OP, "stmt10 and");
         if (andOp)
         {
             AssertLiteral(andOp->left, TokenType::_FALSE, "stmt10 left false");
@@ -354,11 +350,10 @@ void ParserTest::TestBoolOperation()
         }
     }
 
-    auto* assign11 = AssertBinary(stmts[11], TokenType::_EQUAL, "stmt11 assign");
+    auto* assign11 = AssertVarAssign(stmts[11], "booleans", "stmt11 assign");
     if (assign11)
     {
-        AssertIdentifier(assign11->left, "booleans", "stmt11 left");
-        auto* orOp = AssertBinary(assign11->right, TokenType::_OR_OP, "stmt11 or");
+        auto* orOp = AssertBinary(assign11->value, TokenType::_OR_OP, "stmt11 or");
         if (orOp)
         {
             AssertLiteral(orOp->left, TokenType::_TRUE, "stmt11 left true");
@@ -366,11 +361,10 @@ void ParserTest::TestBoolOperation()
         }
     }
 
-    auto* assign12 = AssertBinary(stmts[12], TokenType::_EQUAL, "stmt12 assign");
+    auto* assign12 = AssertVarAssign(stmts[12], "booleans", "stmt12 assign");
     if (assign12)
     {
-        AssertIdentifier(assign12->left, "booleans", "stmt12 left");
-        auto* orOp = AssertBinary(assign12->right, TokenType::_OR_OP, "stmt12 or");
+        auto* orOp = AssertBinary(assign12->value, TokenType::_OR_OP, "stmt12 or");
         if (orOp)
         {
             AssertLiteral(orOp->left, TokenType::_TRUE, "stmt12 left true");
@@ -378,11 +372,10 @@ void ParserTest::TestBoolOperation()
         }
     }
 
-    auto* assign13 = AssertBinary(stmts[13], TokenType::_EQUAL, "stmt13 assign");
+    auto* assign13 = AssertVarAssign(stmts[13], "booleans", "stmt13 assign");
     if (assign13)
     {
-        AssertIdentifier(assign13->left, "booleans", "stmt13 left");
-        auto* orOp = AssertBinary(assign13->right, TokenType::_OR_OP, "stmt13 or");
+        auto* orOp = AssertBinary(assign13->value, TokenType::_OR_OP, "stmt13 or");
         if (orOp)
         {
             AssertLiteral(orOp->left, TokenType::_FALSE, "stmt13 left false");
@@ -423,11 +416,10 @@ void ParserTest::TestBinaOperation()
         }
     }
 
-    auto* assign3 = AssertBinary(stmts[3], TokenType::_EQUAL, "stmt3 assign");
+    auto* assign3 = AssertVarAssign(stmts[3], "result", "stmt3 assign");
     if (assign3)
     {
-        AssertIdentifier(assign3->left, "result", "stmt3 left");
-        auto* xorBin = AssertBinary(assign3->right, TokenType::_XOR_BINARY, "stmt3 xor binary");
+        auto* xorBin = AssertBinary(assign3->value, TokenType::_XOR_BINARY, "stmt3 xor binary");
         if (xorBin)
         {
             AssertIdentifier(xorBin->left, "tester1", "stmt3 left");
@@ -435,11 +427,10 @@ void ParserTest::TestBinaOperation()
         }
     }
 
-    auto* assign4 = AssertBinary(stmts[4], TokenType::_EQUAL, "stmt4 assign");
+    auto* assign4 = AssertVarAssign(stmts[4], "result", "stmt4 assign");
     if (assign4)
     {
-        AssertIdentifier(assign4->left, "result", "stmt4 left");
-        auto* andBin = AssertBinary(assign4->right, TokenType::_AND_BINARY, "stmt4 and binary");
+        auto* andBin = AssertBinary(assign4->value, TokenType::_AND_BINARY, "stmt4 and binary");
         if (andBin)
         {
             AssertIdentifier(andBin->left, "tester1", "stmt4 left");
@@ -447,11 +438,10 @@ void ParserTest::TestBinaOperation()
         }
     }
 
-    auto* assign5 = AssertBinary(stmts[5], TokenType::_EQUAL, "stmt5 assign");
+    auto* assign5 = AssertVarAssign(stmts[5], "result", "stmt5 assign");
     if (assign5)
     {
-        AssertIdentifier(assign5->left, "result", "stmt5 left");
-        auto* unary = ExpressionCast<ExpressionType::_UNARY>(assign5->right);
+        auto* unary = ExpressionCast<ExpressionType::_UNARY>(assign5->value);
         CompilationTest::Assert(unary != nullptr, "stmt5 should be unary");
         if (unary)
         {
@@ -460,11 +450,10 @@ void ParserTest::TestBinaOperation()
         }
     }
 
-    auto* assign6 = AssertBinary(stmts[6], TokenType::_EQUAL, "stmt6 assign");
+    auto* assign6 = AssertVarAssign(stmts[6], "result", "stmt6 assign");
     if (assign6)
     {
-        AssertIdentifier(assign6->left, "result", "stmt6 left");
-        auto* lshift = AssertBinary(assign6->right, TokenType::_L_SHIFT, "stmt6 lshift");
+        auto* lshift = AssertBinary(assign6->value, TokenType::_L_SHIFT, "stmt6 lshift");
         if (lshift)
         {
             AssertIdentifier(lshift->left, "tester1", "stmt6 left");
@@ -472,11 +461,10 @@ void ParserTest::TestBinaOperation()
         }
     }
 
-    auto* assign7 = AssertBinary(stmts[7], TokenType::_EQUAL, "stmt7 assign");
+    auto* assign7 = AssertVarAssign(stmts[7], "result", "stmt7 assign");
     if (assign7)
     {
-        AssertIdentifier(assign7->left, "result", "stmt7 left");
-        auto* rshift = AssertBinary(assign7->right, TokenType::_R_SHIFT, "stmt7 rshift");
+        auto* rshift = AssertBinary(assign7->value, TokenType::_R_SHIFT, "stmt7 rshift");
         if (rshift)
         {
             AssertIdentifier(rshift->left, "tester1", "stmt7 left");
@@ -618,11 +606,10 @@ void ParserTest::TestFunction()
     }
 
     // value = Test_Parameters_Return(value);
-    auto* assign3 = AssertBinary(stmts[3], TokenType::_EQUAL, "stmt3 assign");
+    auto* assign3 = AssertVarAssign(stmts[3], "value", "stmt3 assign");
     if (assign3)
     {
-        AssertIdentifier(assign3->left, "value", "stmt3 left");
-        auto* call3 = ExpressionCast<ExpressionType::_FUNCTION_CALL>(assign3->right);
+        auto* call3 = ExpressionCast<ExpressionType::_FUNCTION_CALL>(assign3->value);
         CompilationTest::Assert(call3 != nullptr, "stmt3 should be function call");
         if (call3)
         {
@@ -669,11 +656,10 @@ void ParserTest::TestLoop()
         CompilationTest::Assert(blockStmts.size() == 1, "do/while body should have 1 stmt");
         if (blockStmts.size() == 1)
         {
-            auto* assign = AssertBinary(blockStmts[0], TokenType::_EQUAL, "body assign");
+            auto* assign = AssertVarAssign(blockStmts[0], "test", "body assign");
             if (assign)
             {
-                AssertIdentifier(assign->left, "test", "body assign left");
-                auto* add = AssertBinary(assign->right, TokenType::_ADD, "body add");
+                auto* add = AssertBinary(assign->value, TokenType::_ADD, "body add");
                 if (add)
                 {
                     AssertIdentifier(add->left, "test", "body add left");

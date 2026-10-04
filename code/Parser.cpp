@@ -197,6 +197,17 @@ VariableDeclarationExpression* Parser::ParseVariableDeclaration()
     return variableDec;
 }
 
+VariableAssignmentExpression *Parser::ParseVariableAssignment()
+{
+    VariableAssignmentExpression* variableAssign = new VariableAssignmentExpression();
+    variableAssign->name = new IdentifierExpression(Consume(TokenType::_SYMBOL));
+
+    Consume(TokenType::_EQUAL);
+    variableAssign->value = ParseExpression();
+
+    return variableAssign;
+}
+
 TypeExpression* Parser::ParseType()
 {
     Token& type = Peek();
@@ -301,6 +312,9 @@ Expression* Parser::ParsePrefix()
     {
         if (Peek(1).type == TokenType::_L_PARENTHESE)
             return ParseFunctionCall();
+
+        if (Peek(1).type == TokenType::_EQUAL)
+            return ParseVariableAssignment();
 
         Consume(TokenType::_SYMBOL);
         return new IdentifierExpression(token);

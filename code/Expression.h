@@ -8,7 +8,7 @@ struct Expression
 	ExpressionType type;
 };
 
-struct ProgramExpression : Expression
+struct ProgramExpression : public Expression
 {
 	ProgramExpression()
 	{
@@ -22,7 +22,7 @@ struct ProgramExpression : Expression
 	std::vector<Expression*> content;
 };
 
-struct IdentifierExpression : Expression
+struct IdentifierExpression : public Expression
 {
 	IdentifierExpression(Token& tok) : token(tok)
 	{
@@ -31,7 +31,7 @@ struct IdentifierExpression : Expression
 	Token token;
 };
 
-struct TypeExpression : Expression
+struct TypeExpression : public Expression
 {
 	TypeExpression(Token& tok) : token(tok)
 	{
@@ -40,7 +40,7 @@ struct TypeExpression : Expression
 	Token token;
 };
 
-struct LiteralExpression : Expression
+struct LiteralExpression : public Expression
 {
 	LiteralExpression(Token& tok) : token(tok)
 	{
@@ -49,7 +49,7 @@ struct LiteralExpression : Expression
 	Token token;
 };
 
-struct UnaryExpression : Expression
+struct UnaryExpression : public Expression
 {
 	UnaryExpression(Token& tok, Expression* l) : token(tok), left(l)
 	{
@@ -60,7 +60,7 @@ struct UnaryExpression : Expression
 	Expression* left = nullptr;
 };
 
-struct BinaryExpression : Expression
+struct BinaryExpression : public Expression
 {
 	BinaryExpression(Token& tok, Expression* l, Expression* r) : token(tok), left(l), right(r)
 	{
@@ -72,7 +72,7 @@ struct BinaryExpression : Expression
 	Expression* right = nullptr;
 };
 
-struct BlockExpression : Expression
+struct BlockExpression : public Expression
 {
 	BlockExpression()
 	{
@@ -85,7 +85,7 @@ struct BlockExpression : Expression
 	std::vector<Expression*> content;
 };
 
-struct ParameterExpression : Expression
+struct ParameterExpression : public Expression
 {
 	ParameterExpression()
 	{
@@ -96,7 +96,7 @@ struct ParameterExpression : Expression
 	TypeExpression* paramType = nullptr;
 };
 
-struct FunctionDeclarationExpression : Expression
+struct FunctionDeclarationExpression : public Expression
 {
 	FunctionDeclarationExpression()
 	{
@@ -115,7 +115,7 @@ struct FunctionDeclarationExpression : Expression
 	BlockExpression* content = nullptr;
 };
 
-struct FunctionCallExpression : Expression
+struct FunctionCallExpression : public Expression
 {
 	FunctionCallExpression()
 	{
@@ -130,7 +130,7 @@ struct FunctionCallExpression : Expression
 	std::vector<Expression*> arguments;
 };
 
-struct VariableDeclarationExpression : Expression
+struct VariableDeclarationExpression : public Expression
 {
 	VariableDeclarationExpression()
 	{
@@ -147,7 +147,7 @@ struct VariableDeclarationExpression : Expression
 	Expression* value = nullptr;
 };
 
-struct ReturnStatementExpression : Expression
+struct ReturnStatementExpression : public Expression
 {
 	ReturnStatementExpression()
 	{
@@ -157,7 +157,7 @@ struct ReturnStatementExpression : Expression
 	Expression* value = nullptr;
 };
 
-struct DoWhileExpression : Expression 
+struct DoWhileExpression : public Expression 
 {
 	DoWhileExpression()
 	{
@@ -172,22 +172,22 @@ struct DoWhileExpression : Expression
 	Expression* condition;
 };
 
-struct VariableAssignment : Expression 
+struct VariableAssignmentExpression : public Expression 
 {
-	VariableAssignment()
+	VariableAssignmentExpression()
 	{
 		type = ExpressionType::_VARIABLE_ASSIGNMENT;
 	}
-	~VariableAssignment()
+	~VariableAssignmentExpression()
 	{
-		delete variable;
+		delete name;
 		delete value;
 	}
-	IdentifierExpression* variable;
+	IdentifierExpression* name;
 	Expression* value;
 };
 
-struct IfExpression : Expression
+struct IfExpression : public Expression
 {
 	IfExpression()
 	{
@@ -201,7 +201,7 @@ struct IfExpression : Expression
 	BlockExpression* block;
 };
 
-struct CommentExpression : Expression 
+struct CommentExpression : public Expression 
 {
 	CommentExpression()
 	{
