@@ -12,7 +12,7 @@ void Analyser::Analyse()
     GlobalAnalyse();
 }
 
-std::vector<str> Analyser::GetErrors()
+std::vector<AnalyserError> Analyser::GetErrors()
 {
     return m_errors;
 }
@@ -26,8 +26,8 @@ void Analyser::PrintErrors()
 {
     for (size_t i = 0; i < m_errors.size(); i++)
     {
-        str error = m_errors[i];
-        std::cout << "Error " << std::to_string(i) << " : " << error << std::endl;
+        AnalyserError error = m_errors[i];
+        error.Print();
     }
 }
 
@@ -58,7 +58,7 @@ void Analyser::CollectGlobals()
             if (m_scopes.back()->Declare(funcExpr->functionName->token.view, funcSymbol) == nullptr)
             {
                 delete funcSymbol;
-                m_errors.push_back(std::string(funcExpr->functionName->token.view) + " may have already been declared");
+                m_errors.push_back({std::string(funcExpr->functionName->token.view) + " may have already been declared", funcExpr});
                 funcExpr->hasError = true;
             }
             break;
@@ -71,7 +71,7 @@ void Analyser::CollectGlobals()
             if (m_scopes.back()->Declare(varExpr->name->token.view, varSymbol) == nullptr)
             {
                 delete varSymbol;
-                m_errors.push_back(std::string(varExpr->name->token.view) + " may have already been declared");
+                m_errors.push_back({std::string(varExpr->name->token.view) + " may have already been declared", varExpr});
                 varExpr->hasError = true;
             }
             break;
@@ -123,7 +123,7 @@ TokenType Analyser::AnalyseExpression(Expression *expr)
         case ExpressionType::_FUNCTION_CALL:        return FunctionCallAnalyse(ExpressionCast<ExpressionType::_FUNCTION_CALL>(expr));
         case ExpressionType::_VARIABLE_DECLARATION: VarDeclarationAnalyse(ExpressionCast<ExpressionType::_VARIABLE_DECLARATION>(expr));  return TokenType::_DEFAULT;
         case ExpressionType::_VARIABLE_ASSIGNMENT:  VarAssignmentAnalyse(ExpressionCast<ExpressionType::_VARIABLE_ASSIGNMENT>(expr));  return TokenType::_DEFAULT;
-        case ExpressionType::_IDENTIFIER:           IdentifierAnalyse(ExpressionCast<ExpressionType::_IDENTIFIER>(expr));  return TokenType::_DEFAULT;
+        case ExpressionType::_IDENTIFIER:           return IdentifierAnalyse(ExpressionCast<ExpressionType::_IDENTIFIER>(expr));
         case ExpressionType::_TYPE:                 TypeAnalyse(ExpressionCast<ExpressionType::_TYPE>(expr));  return TokenType::_DEFAULT;
         case ExpressionType::_LITERAL:              return LiteralAnalyse(ExpressionCast<ExpressionType::_LITERAL>(expr));
         case ExpressionType::_UNARY:                return UnaryAnalyse(ExpressionCast<ExpressionType::_UNARY>(expr));
@@ -153,26 +153,20 @@ void Analyser::ReturnAnalyse(ReturnExpression *ret)
 {
     if (m_currentFunc == nullptr)
     {
-        m_errors.push_back("return out of function");
+        m_errors.push_back({"return out of function",ret});
         ret->hasError = true;
         return;
     }
     
     if (ret->value == nullptr && m_currentFunc->returnType == nullptr)
         return;
-    else
-    {
-        m_errors.push_back("return statement and function return type don't match on " + std::string(m_currentFunc->functionName->token.view));
-        ret->hasError = true;
-        return;
-    }
+
 
     TokenType retType = AnalyseExpression(ret->value);
-
     std::pair<bool,TokenType> typeInfer = TypeInference(m_currentFunc->returnType->token.type, retType);
     if (typeInfer.first == false)
     {
-        m_errors.push_back("return statement and function return type don't match on " + std::string(m_currentFunc->functionName->token.view));
+        m_errors.push_back({"return statement and function return type don't match on " + std::string(m_currentFunc->functionName->token.view), ret});
         ret->hasError = true;
     }
     
@@ -198,7 +192,7 @@ void Analyser::FunctionAnalyse(FunctionDeclarationExpression *func)
         fnSmb = SymbolCast<SymbolType::_FUNC>(m_scopes.back()->GetSymbol(func->functionName->token.view));
         if (fnSmb == nullptr)
         {
-            m_errors.push_back(std::string(func->functionName->token.view) + " is not a function");
+            m_errors.push_back({std::string(func->functionName->token.view) + " is not a function", func});
             func->hasError = true;
             return;
         }
@@ -209,7 +203,7 @@ void Analyser::FunctionAnalyse(FunctionDeclarationExpression *func)
         if (m_scopes.back()->Declare(func->functionName->token.view, fnSmb) == nullptr)
         {
             delete fnSmb;
-            m_errors.push_back(std::string(func->functionName->token.view) + " may have already been declared");
+            m_errors.push_back({std::string(func->functionName->token.view) + " may have already been declared", func});
             func->hasError = true;
             return;
         }
@@ -249,7 +243,7 @@ TokenType Analyser::ParameterAnalyse(ParameterExpression *param)
     if(m_scopes.back()->Declare(param->name->token.view, sym) == nullptr)
     {
         delete sym;
-        m_errors.push_back(std::string(param->name->token.view) + " may have already been declared");
+        m_errors.push_back({std::string(param->name->token.view) + " may have already been declared", param});
         param->hasError = true;
         return TokenType::_DEFAULT;
     }
@@ -262,21 +256,21 @@ TokenType Analyser::FunctionCallAnalyse(FunctionCallExpression *call)
     Symbol* sym = m_scopes.back()->GetSymbol(call->name->token.view);
     if (sym == nullptr)
     {
-        m_errors.push_back("function " + std::string(call->name->token.view) + " could not be found");
+        m_errors.push_back({"function " + std::string(call->name->token.view) + " could not be found", call});
         call->hasError = true;
         return TokenType::_DEFAULT;
     }
 
     FuncSymbol* fnSmb = SymbolCast<SymbolType::_FUNC>(sym);
     if (fnSmb == nullptr) {
-        m_errors.push_back(std::string(call->name->token.view) + " is not a function");
+        m_errors.push_back({std::string(call->name->token.view) + " is not a function", call});
         call->hasError = true;
         return TokenType::_DEFAULT;
     }
     
     if (call->arguments.size() != fnSmb->paramsType.size())
     {
-        m_errors.push_back("function " + std::string(call->name->token.view) + " expect" + std::to_string(fnSmb->paramsType.size()) + ", " + std::to_string(call->arguments.size()) + " were given");
+        m_errors.push_back({"function " + std::string(call->name->token.view) + " expect" + std::to_string(fnSmb->paramsType.size()) + ", " + std::to_string(call->arguments.size()) + " were given", call});
         call->hasError = true;
         return TokenType::_DEFAULT;
     }
@@ -288,7 +282,7 @@ TokenType Analyser::FunctionCallAnalyse(FunctionCallExpression *call)
         TokenType paramType = fnSmb->paramsType[i];
         if (argType != paramType)
         {
-            m_errors.push_back("function call arguments does not match type of " + std::string(fnSmb->m_name) + " parameters");
+            m_errors.push_back({"function call arguments does not match type of " + std::string(fnSmb->m_name) + " parameters", call});
             call->hasError = true;
             return TokenType::_DEFAULT;
         }
@@ -307,7 +301,7 @@ void Analyser::VarDeclarationAnalyse(VariableDeclarationExpression *varDec)
         varSmb = SymbolCast<SymbolType::_VAR>(smb);
         if (varSmb == nullptr)
         {
-            m_errors.push_back(std::string(varDec->name->token.view) + " is not a variable");
+            m_errors.push_back({std::string(varDec->name->token.view) + " is not a variable", varDec});
             varDec->hasError = true;
             return;
         }
@@ -319,7 +313,7 @@ void Analyser::VarDeclarationAnalyse(VariableDeclarationExpression *varDec)
         if (m_scopes.back()->Declare(varDec->name->token.view,varSmb) == nullptr)
         {
             delete varSmb;
-            m_errors.push_back(std::string(varDec->name->token.view) + " may have already been declared");
+            m_errors.push_back({std::string(varDec->name->token.view) + " may have already been declared", varDec});
             varDec->hasError = true;
             return;
         }
@@ -327,13 +321,24 @@ void Analyser::VarDeclarationAnalyse(VariableDeclarationExpression *varDec)
 
     if (varDec->value != nullptr)
     {
-        TokenType varType = AnalyseExpression(varDec->value);
-        if (varType != varDec->varType->token.type)
+        TokenType valueType = AnalyseExpression(varDec->value);
+        static un_set<TokenType> valueTypeSet = {
+            TokenType::_BOOL,
+            TokenType::_I8, TokenType::_I16, TokenType::_I32, TokenType::_I64,
+            TokenType::_U8, TokenType::_U16, TokenType::_U32, TokenType::_U64,
+        };
+        if 
+        (
+            !(valueType == varDec->varType->token.type ||
+            valueType == TokenType::_VALUE && valueTypeSet.count(varDec->varType->token.type) ||
+            varDec->varType->token.type == TokenType::_STRING_IDENTIFIER && (valueType == TokenType::_STRING_IDENTIFIER || valueType == TokenType::_STRING_LITTERAL))
+        )
         {
-            m_errors.push_back("could not assign value to " + std::string(varSmb->m_name) + " because of type difference");
-            varDec->hasError = true;
-            return;
+                m_errors.push_back({"could not assign value to " + std::string(varSmb->m_name) + " because of type difference " + std::to_string((int)valueType) + " and " + std::to_string((int)varSmb->varType), varDec});
+                varDec->hasError = true;
+                return;
         }
+        
     }
 
     varDec->symbol = varSmb;
@@ -344,7 +349,7 @@ void Analyser::VarAssignmentAnalyse(VariableAssignmentExpression *varAssign)
     Symbol* smb = m_scopes.back()->GetSymbol(varAssign->name->token.view);
     if (smb == nullptr)
     {
-        m_errors.push_back("variable " + std::string(varAssign->name->token.view) + " has not been declared");
+        m_errors.push_back({"variable " + std::string(varAssign->name->token.view) + " has not been declared", varAssign});
         varAssign->hasError = true;
         return;
     }
@@ -352,7 +357,7 @@ void Analyser::VarAssignmentAnalyse(VariableAssignmentExpression *varAssign)
     VarSymbol* varSmb = SymbolCast<SymbolType::_VAR>(smb);
     if (varSmb == nullptr)
     {
-        m_errors.push_back(std::string(varAssign->name->token.view) + " is not a viariable");
+        m_errors.push_back({std::string(varAssign->name->token.view) + " is not a viariable", varAssign});
         varAssign->hasError = true;
         return;
     }
@@ -360,7 +365,7 @@ void Analyser::VarAssignmentAnalyse(VariableAssignmentExpression *varAssign)
     TokenType varType = AnalyseExpression(varAssign->value);
     if (varType != varSmb->varType)
     {
-        m_errors.push_back("could not assign value to " + std::string(varSmb->m_name) + " because of type difference");
+        m_errors.push_back({"could not assign value to " + std::string(varSmb->m_name) + " because of type difference " + std::to_string((int)varType) + " and " + std::to_string((int)varSmb->varType), varAssign});
         varAssign->hasError = true;
         return;
     }
@@ -368,17 +373,33 @@ void Analyser::VarAssignmentAnalyse(VariableAssignmentExpression *varAssign)
     varAssign->symbol = varSmb;
 }
 
-void Analyser::IdentifierAnalyse(IdentifierExpression *id)
+TokenType Analyser::IdentifierAnalyse(IdentifierExpression *id)
 {
     Symbol* sym = m_scopes.back()->GetSymbol(id->token.view);
     if (sym == nullptr)
     {
-        m_errors.push_back("undefined Identifier " + std::string(id->token.view));
+        m_errors.push_back({"undefined Identifier " + std::string(id->token.view), id});
         id->hasError = true;
-        return;
+        return TokenType::_DEFAULT;
     }
 
     id->symbol = sym; 
+
+    switch (sym->type)
+    {
+    case SymbolType::_FUNC:   
+    {
+        FuncSymbol* fnSmb = SymbolCast<SymbolType::_FUNC>(sym);
+        return fnSmb->returnType;
+    }
+    case SymbolType::_VAR:
+    {
+        VarSymbol* varSmb = SymbolCast<SymbolType::_VAR>(sym);
+        return varSmb->varType;
+    }
+    default:
+        return TokenType::_DEFAULT;
+    }
 }
 
 void Analyser::TypeAnalyse(TypeExpression *type)
@@ -403,7 +424,7 @@ TokenType Analyser::BinaryAnalyse(BinaryExpression *binary)
     std::pair<bool,TokenType> typeInfer = TypeInference(leftType, rightType);
     if (typeInfer.first == false)
     {
-        m_errors.push_back("can't do operation between" + std::to_string((int)leftType) + " and " + std::to_string((int)rightType));
+        m_errors.push_back({"can't do operation between " + std::to_string((int)leftType) + " and " + std::to_string((int)rightType), binary});
         binary->hasError = true;
         return TokenType::_DEFAULT;
     }

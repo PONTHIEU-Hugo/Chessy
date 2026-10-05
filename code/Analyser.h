@@ -1,6 +1,7 @@
 #pragma once
 #include "Defines.h"
 #include "Expression.h"
+#include "AnalyserError.h"
 
 class Scope;
 
@@ -9,7 +10,7 @@ class Analyser
 public:
     Analyser(ProgramExpression* program);
     void Analyse();
-    std::vector<str> GetErrors();
+    std::vector<AnalyserError> GetErrors();
     bool HasErrors();
     void PrintErrors();
 
@@ -33,7 +34,7 @@ private:
     void VarDeclarationAnalyse(VariableDeclarationExpression* varDec);
     void VarAssignmentAnalyse(VariableAssignmentExpression* varAssign);
 
-    void IdentifierAnalyse(IdentifierExpression* id);
+    TokenType IdentifierAnalyse(IdentifierExpression* id);
     void TypeAnalyse(TypeExpression* type);
     TokenType LiteralAnalyse(LiteralExpression* literal);
 
@@ -48,7 +49,7 @@ private:
     void PopScope(bool popFunc = false);
 private:
     std::vector<Scope*> m_scopes;
-    std::vector<str> m_errors;
+    std::vector<AnalyserError> m_errors;
     ProgramExpression* m_program = nullptr;
     FunctionDeclarationExpression* m_currentFunc = nullptr;
     int m_nextSlot = 0;

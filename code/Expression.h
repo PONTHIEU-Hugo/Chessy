@@ -11,8 +11,14 @@ struct Expression
 	virtual ~Expression() = default;
 	ExpressionType type;
 	bool hasError = false;
-	int line = 0; // todo :: added for analyser to make error more precise
-	int col = 0; // todo
+	int line = 0;
+	int col = 0;
+
+	void SetLineCol(int l, int c)
+	{
+		line = l;
+		col = c;
+	}
 };
 
 struct ProgramExpression : public Expression
@@ -34,6 +40,7 @@ struct IdentifierExpression : public Expression
 	IdentifierExpression(Token& tok) : token(tok)
 	{
 		type = ExpressionType::_IDENTIFIER;
+		SetLineCol(tok.line,tok.column);
 	}
 	Token token;
 	Symbol* symbol = nullptr;
@@ -44,6 +51,7 @@ struct TypeExpression : public Expression
 	TypeExpression(Token& tok) : token(tok)
 	{
 		type = ExpressionType::_TYPE;
+		SetLineCol(tok.line,tok.column);
 	}
 	Token token;
 };
@@ -53,6 +61,7 @@ struct LiteralExpression : public Expression
 	LiteralExpression(Token& tok) : token(tok)
 	{
 		type = ExpressionType::_LITERAL;
+		SetLineCol(tok.line,tok.column);
 	}
 	Token token;
 };
@@ -62,6 +71,7 @@ struct UnaryExpression : public Expression
 	UnaryExpression(Token& tok, Expression* l) : token(tok), left(l)
 	{
 		type = ExpressionType::_UNARY;
+		SetLineCol(tok.line,tok.column);
 	}
 	~UnaryExpression() override { delete left; }
 	Token token;
@@ -73,6 +83,7 @@ struct BinaryExpression : public Expression
 	BinaryExpression(Token& tok, Expression* l, Expression* r) : token(tok), left(l), right(r)
 	{
 		type = ExpressionType::_BINARY;
+		SetLineCol(tok.line,tok.column);
 	}
 	~BinaryExpression() override { delete left; delete right; }
 	Token token;
