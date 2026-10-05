@@ -5,6 +5,7 @@ add_library(chessy_core STATIC
     Parser.cpp
     Scope.cpp
     Analyser.cpp
+    Compiler.cpp
 )
 target_include_directories(chessy_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_compile_definitions(chessy_core PUBLIC
