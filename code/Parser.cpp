@@ -220,15 +220,15 @@ TypeExpression* Parser::ParseType()
     return typeExpr;
 }
 
-ReturnStatementExpression* Parser::ParseReturnStatement()
+ReturnExpression* Parser::ParseReturn()
 {
-    ReturnStatementExpression* returnStatement = new ReturnStatementExpression();
+    ReturnExpression* ret = new ReturnExpression();
     Consume(TokenType::_RETURN);
     if (Peek().type == TokenType::_SEMI_COLON)
-        return returnStatement;
+        return ret;
 
-    returnStatement->value = ParseExpression();
-    return returnStatement;
+    ret->value = ParseExpression();
+    return ret;
 }
 
 DoWhileExpression* Parser::ParseDoWhile()
@@ -350,7 +350,7 @@ Expression* Parser::ParsePrefix()
 
     if (token.type == TokenType::_RETURN)
     {
-        return ParseReturnStatement();
+        return ParseReturn();
     }
 
     if (token.type == TokenType::_NOT_OP || token.type == TokenType::_SUB || token.type == TokenType::_ADD)

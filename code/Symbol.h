@@ -26,6 +26,8 @@ public:
 class FuncSymbol : public Symbol
 {
 public:
+    int slot_count;
+    int ParamNumber;
     FuncSymbol()
     {
         type = SymbolType::_FUNC;

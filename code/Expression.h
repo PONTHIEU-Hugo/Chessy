@@ -6,6 +6,9 @@ struct Expression
 {
 	virtual ~Expression() = default;
 	ExpressionType type;
+	bool hasError = false;
+	int line = 0; // todo :: added for analyser to make error more precise
+	int col = 0; // todo
 };
 
 struct ProgramExpression : public Expression
@@ -147,13 +150,13 @@ struct VariableDeclarationExpression : public Expression
 	Expression* value = nullptr;
 };
 
-struct ReturnStatementExpression : public Expression
+struct ReturnExpression : public Expression
 {
-	ReturnStatementExpression()
+	ReturnExpression()
 	{
 		type = ExpressionType::_RETURN;
 	}
-	~ReturnStatementExpression() override { delete value; }
+	~ReturnExpression() override { delete value; }
 	Expression* value = nullptr;
 };
 
