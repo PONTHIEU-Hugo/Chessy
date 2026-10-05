@@ -9,6 +9,9 @@ class Analyser
 public:
     Analyser(ProgramExpression* program);
     void Analyse();
+    std::vector<str> GetErrors();
+    bool HasErrors();
+    void PrintErrors();
 
 private:
     void GlobalAnalyse();
@@ -16,7 +19,7 @@ private:
     void AnalyseBodies();
     void AddBuiltin();
 
-    void AnalyseExpression(Expression* expr);
+    TokenType AnalyseExpression(Expression* expr);
 
     void BlockAnalyse(BlockExpression* block);
     void ReturnAnalyse(ReturnExpression* ret);
@@ -24,18 +27,20 @@ private:
     void IfAnalyse(IfExpression* ifStmt);
 
     void FunctionAnalyse(FunctionDeclarationExpression* func);
-    void ParameterAnalyse(ParameterExpression* param);
-    void FunctionCallAnalyse(FunctionCallExpression* call);
+    TokenType ParameterAnalyse(ParameterExpression* param);
+    TokenType FunctionCallAnalyse(FunctionCallExpression* call);
 
     void VarDeclarationAnalyse(VariableDeclarationExpression* varDec);
     void VarAssignmentAnalyse(VariableAssignmentExpression* varAssign);
 
     void IdentifierAnalyse(IdentifierExpression* id);
     void TypeAnalyse(TypeExpression* type);
-    void LiteralAnalyse(LiteralExpression* literal);
+    TokenType LiteralAnalyse(LiteralExpression* literal);
 
-    void UnaryAnalyse(UnaryExpression* unary);
-    void BinaryAnalyse(BinaryExpression* binary);
+    TokenType UnaryAnalyse(UnaryExpression* unary);
+    TokenType BinaryAnalyse(BinaryExpression* binary);
+
+    std::pair<bool,TokenType> TypeInference(TokenType typeA, TokenType typeB);
 
     void CommentAnalyse(CommentExpression* comment);
 

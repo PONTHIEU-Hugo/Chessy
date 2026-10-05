@@ -1,10 +1,11 @@
 #pragma once
 #include "Defines.h"
 #include "SymbolType.h"
+#include "Token.h"
 
 class Scope;
 
-class Symbol
+struct Symbol
 {
 public:
     virtual ~Symbol() = default;
@@ -13,28 +14,30 @@ public:
     Scope* m_scope = nullptr;
 };
 
-class VarSymbol : public Symbol
+struct VarSymbol : public Symbol
 {
 public:
     int m_slot = -1; // ? maybe 
-    VarSymbol()
+    TokenType varType;
+    VarSymbol(TokenType vType) : varType(vType)
     {
         type = SymbolType::_VAR;
     }
 };
 
-class FuncSymbol : public Symbol
+struct FuncSymbol : public Symbol
 {
 public:
     int slot_count;
-    int ParamNumber;
+    vector<TokenType> paramsType;
+    TokenType returnType;
     FuncSymbol()
     {
         type = SymbolType::_FUNC;
     }
 };
 
-class ConstSymbol : public Symbol
+struct ConstSymbol : public Symbol
 {
 public:
     ConstSymbol()

@@ -2,6 +2,10 @@
 #include "Token.h"
 #include "ExpressionType.h"
 
+struct Symbol;
+struct VarSymbol;
+struct FuncSymbol;
+
 struct Expression
 {
 	virtual ~Expression() = default;
@@ -32,6 +36,7 @@ struct IdentifierExpression : public Expression
 		type = ExpressionType::_IDENTIFIER;
 	}
 	Token token;
+	Symbol* symbol = nullptr;
 };
 
 struct TypeExpression : public Expression
@@ -116,6 +121,7 @@ struct FunctionDeclarationExpression : public Expression
 	std::vector<ParameterExpression*> parameters;
 	TypeExpression* returnType = nullptr;
 	BlockExpression* content = nullptr;
+	FuncSymbol* symb = nullptr;	
 };
 
 struct FunctionCallExpression : public Expression
@@ -131,6 +137,7 @@ struct FunctionCallExpression : public Expression
 	}
 	IdentifierExpression* name = nullptr;
 	std::vector<Expression*> arguments;
+	FuncSymbol* symb = nullptr;	
 };
 
 struct VariableDeclarationExpression : public Expression
@@ -148,6 +155,7 @@ struct VariableDeclarationExpression : public Expression
 	TypeExpression* varType = nullptr;
 	IdentifierExpression* name = nullptr;
 	Expression* value = nullptr;
+	VarSymbol* symbol = nullptr;
 };
 
 struct ReturnExpression : public Expression
@@ -188,6 +196,7 @@ struct VariableAssignmentExpression : public Expression
 	}
 	IdentifierExpression* name;
 	Expression* value;
+	VarSymbol* symbol = nullptr;
 };
 
 struct IfExpression : public Expression

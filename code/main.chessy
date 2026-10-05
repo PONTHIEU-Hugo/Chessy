@@ -7,5 +7,6 @@ func main()
 {
     i32 x = 50;
     i32 y = 45;
+    i16 z = 20;
     Add(x, y);
 }
