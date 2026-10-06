@@ -2,19 +2,26 @@
 #include "Defines.h"
 #include "Instruction.h"
 #include "ConstantContainer.h"
+#include "FunctionInfo.h"
 
 struct Chunk
 {
 private:
 	vector<Instruction> instructions;
 	vector<ConstantContainer> constants;
+	vector<FunctionInfo> functions;
 
 public:
 	size_t push_instruction(const Instruction instructionCode);
 	size_t push_constant(const ConstantContainer constantValue);
-
+	size_t push_function(const FunctionInfo& f);
+	
 	Instruction& read_instruction(const size index) { return instructions[index]; }
 	ConstantContainer& read_constants(const size index) { return constants[index]; }
+	FunctionInfo& read_functions(const size index) { return functions[index]; }
 
 	size instruction_size() { return instructions.size(); }
+	size constant_size() const { return constants.size(); }
 };
+
+

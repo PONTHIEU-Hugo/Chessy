@@ -3,14 +3,29 @@
 
 enum class OpCode : u8
 {
-    _MOV, _LOADC, _LOAD, _PUSH, _POP,
+    _MOV,      
+    _LOADC,    
+    _LOAD,      
+    _STORE,      
+    _PUSH,      
+    _POP,        
 
-    _ADD, _SUB, _MUL, _DIV, _POW,
+    _ADD, _SUB, _MUL, _DIV, _MOD, _POW,
+    _NEG,
 
     _AND, _OR, _XOR, _NOT,
-    _CMP,
+    _SHL, _SHR,
 
-    _JMP, _PRINT,
+    _CMP_EQ, _CMP_NE, _CMP_LT, _CMP_LE, _CMP_GT, _CMP_GE,
 
-    _END
+    _JMP,       
+    _JZ,         
+    _JNZ,       
+
+
+    _CALL,       
+    _RET,      
+
+    _PRINT,
+    _HALT,
 };
