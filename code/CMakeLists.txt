@@ -3,6 +3,8 @@ add_library(chessy_core STATIC
     Token.cpp
     Lexer.cpp
     Parser.cpp
+    Chunk.cpp
+    VM.cpp
 )
 target_include_directories(chessy_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_compile_definitions(chessy_core PUBLIC
