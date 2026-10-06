@@ -304,7 +304,6 @@ int Compiler::GetConstIndex(ConstantContainer& c)
             return static_cast<int>(i);
     }
 
-    // Pas trouvé, on l'ajoute.
     size_t idx = m_chunk.push_constant(c);
     return static_cast<int>(idx);
 }
