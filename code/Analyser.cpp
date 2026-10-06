@@ -161,7 +161,6 @@ void Analyser::ReturnAnalyse(ReturnExpression *ret)
     if (ret->value == nullptr && m_currentFunc->returnType == nullptr)
         return;
 
-
     TokenType retType = AnalyseExpression(ret->value);
     std::pair<bool,TokenType> typeInfer = TypeInference(m_currentFunc->returnType->token.type, retType);
     if (typeInfer.first == false)
@@ -199,14 +198,9 @@ void Analyser::FunctionAnalyse(FunctionDeclarationExpression *func)
     }
     else
     {
-        fnSmb = new FuncSymbol(); 
-        if (m_scopes.back()->Declare(func->functionName->token.view, fnSmb) == nullptr)
-        {
-            delete fnSmb;
-            m_errors.push_back({std::string(func->functionName->token.view) + " may have already been declared", func});
-            func->hasError = true;
-            return;
-        }
+        m_errors.push_back({std::string(func->functionName->token.view) + " can't be declared inside another function", func});
+        func->hasError = true;
+        return;
     }
 
     AddScope(func);

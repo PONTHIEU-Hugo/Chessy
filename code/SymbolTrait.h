@@ -4,7 +4,6 @@
 
 template <SymbolType K> struct SymbolTrait;
 template <> struct SymbolTrait<SymbolType::_VAR>             { using type = VarSymbol; };
-template <> struct SymbolTrait<SymbolType::_CONST>           { using type = ConstSymbol; };
 template <> struct SymbolTrait<SymbolType::_FUNC>            { using type = FuncSymbol; };
 
 template <SymbolType K>

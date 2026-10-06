@@ -36,12 +36,3 @@ public:
         type = SymbolType::_FUNC;
     }
 };
-
-struct ConstSymbol : public Symbol
-{
-public:
-    ConstSymbol()
-    {
-        type = SymbolType::_CONST;
-    }
-};
