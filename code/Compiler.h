@@ -44,7 +44,7 @@ private:
     OpCode GetBinaryOp(TokenType token);
 private:
     vector<PendingJump> m_pendingJumps;
-    vector<size_t>      m_labelPc;  
+    vector<size_t> m_labelPc;  
 
     ProgramExpression* m_program = nullptr;
     un_map<str, int> m_consts;
