@@ -86,25 +86,38 @@ inline static constexpr array<NoReturnOperationPtrSolo, TABLE_COUNT> PRINT_TABLE
 );
 
 constexpr int registerAmount = 256;
+constexpr size framesAllocationSize = 64;
+constexpr size stackAllocationSize = 1024;
 
 
 class VM
 {
 private:
+    struct StackFrame
+    {
+        size beginIndex;
+        size frameSize;
+    };
+
+private:
 	array<ConstantContainer, registerAmount> m_Registers;
     vector<ConstantContainer> m_Stack;
+    size m_StackIndex;    
+    vector<StackFrame> m_Frames;
+    size m_FramesIndex;
 
 	size m_InstructionIndex;
+    vector<size> m_OldInstructionIndex;
 
 	Chunk* m_pChunk;
 
 public:
+    VM();
+
 	void SetChunk(Chunk* pChunk) { m_pChunk = pChunk; }
 
 	void Run();
 
 private:
 	Instruction& Read_Instruction();
-
-	void Add(const Instruction& rInstruction);
 };
