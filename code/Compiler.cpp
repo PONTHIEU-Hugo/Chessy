@@ -43,6 +43,15 @@ void Compiler::CompileProgram()
         }
     }
 
+    int mainIndex = FindMainFunctionIndex();
+    if (mainIndex < 0)
+    {
+        // TODO :: make it a error later 
+        return;
+    }
+    Emit(OpCode::_CALL, static_cast<u8>(mainIndex), 0);
+    Emit(OpCode::_HALT);
+
     for (size_t i = 0; i < m_program->content.size(); i++)
     {
         Expression* expr = m_program->content[i];
@@ -331,4 +340,16 @@ OpCode Compiler::GetBinaryOp(TokenType token)
     default:
         return OpCode::_HALT; // TODO :: make a compil error later
     }
+}
+
+int Compiler::FindMainFunctionIndex()
+{
+    for (Expression* expr : m_program->content)
+    {
+        if (expr->type != ExpressionType::_FUNCTION_DECLARATION) continue;
+        auto* fn = ExpressionCast<ExpressionType::_FUNCTION_DECLARATION>(expr);
+        if (fn->functionName->token.view == "main")
+            return fn->symb->function_index;
+    }
+    return -1;
 }

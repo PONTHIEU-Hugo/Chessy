@@ -42,6 +42,8 @@ private:
     int GetConstIndex(ConstantContainer& c);
 
     OpCode GetBinaryOp(TokenType token);
+
+    int FindMainFunctionIndex();
 private:
     vector<PendingJump> m_pendingJumps;
     vector<size_t> m_labelPc;  
