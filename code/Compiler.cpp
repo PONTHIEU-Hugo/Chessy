@@ -128,7 +128,7 @@ void Compiler::CompileIf(IfExpression *ifStmt)
 
 void Compiler::CompileFunctionDeclaration(FunctionDeclarationExpression *functionDeclaration)
 {
-    int index = functionDeclaration->symb->function_index;
+    size index = functionDeclaration->symb->function_index;
     FunctionInfo& fnInfo = m_chunk.read_functions(index);
     fnInfo.entry = m_chunk.instruction_size();
     CompileBlock(functionDeclaration->content);

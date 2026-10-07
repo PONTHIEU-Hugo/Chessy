@@ -31,7 +31,7 @@ public:
     int slot_count;
     vector<TokenType> paramsType;
     TokenType returnType;
-    int function_index = -1;
+    size function_index = -1;
     FuncSymbol()
     {
         type = SymbolType::_FUNC;

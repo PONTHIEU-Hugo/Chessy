@@ -5,7 +5,7 @@
 struct Instruction
 {
 	OpCode operation;
-	u8 regA;
-	u8 regB;
-	u8 regC;
+	size regA;
+	size regB;
+	size regC;
 };
