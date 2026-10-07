@@ -30,7 +30,7 @@ struct FuncSymbol : public Symbol
 public:
     int slot_count;
     vector<TokenType> paramsType;
-    TokenType returnType;
+    TokenType returnType = TokenType::_DEFAULT;
     size function_index = -1;
     FuncSymbol()
     {

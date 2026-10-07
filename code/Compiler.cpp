@@ -348,7 +348,7 @@ int Compiler::FindMainFunctionIndex()
     {
         if (expr->type != ExpressionType::_FUNCTION_DECLARATION) continue;
         auto* fn = ExpressionCast<ExpressionType::_FUNCTION_DECLARATION>(expr);
-        if (fn->functionName->token.view == "main")
+        if (fn->functionName->token.view == "Main")
             return fn->symb->function_index;
     }
     return -1;

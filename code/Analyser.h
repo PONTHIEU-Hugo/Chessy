@@ -17,6 +17,7 @@ public:
 private:
     void GlobalAnalyse();
     void CollectGlobals();
+    void CheckMain();
     void AnalyseBodies();
     void AddBuiltin();
 

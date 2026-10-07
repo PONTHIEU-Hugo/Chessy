@@ -36,6 +36,7 @@ void Analyser::GlobalAnalyse()
     m_scopes.push_back(new Scope(nullptr));
     AddBuiltin();
     CollectGlobals();
+    CheckMain();
     AnalyseBodies();
     PopScope();
 }
@@ -80,6 +81,26 @@ void Analyser::CollectGlobals()
         }
     }
     
+}
+
+void Analyser::CheckMain()
+{
+    Symbol* sym = m_scopes.back()->GetSymbol("Main");
+    if (sym == nullptr)
+    {
+        m_errors.push_back({"Main function is not defined", nullptr});
+        return;
+    }
+    FuncSymbol* fn = SymbolCast<SymbolType::_FUNC>(sym);
+    if (fn == nullptr)
+    {
+        m_errors.push_back({"Main is not a function", nullptr});
+        return;
+    }
+    if (!fn->paramsType.empty())
+        m_errors.push_back({"Main must not take arguments", nullptr});
+    if (fn->returnType != TokenType::_DEFAULT)
+        m_errors.push_back({"Main must return nothing", nullptr});
 }
 
 void Analyser::AnalyseBodies()
