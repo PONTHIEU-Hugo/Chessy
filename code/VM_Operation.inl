@@ -1,5 +1,5 @@
 
-
+// TODO: Place right error code
 template <ConstantType LType, ConstantType RType>
 ConstantContainer Add(const ConstantContainer& rLeft, const ConstantContainer& rRight)
 {
@@ -19,7 +19,7 @@ ConstantContainer Add(const ConstantContainer& rLeft, const ConstantContainer& r
     else
     {
         std::cout << "Sum between: " << static_cast<int>(LType) << " and: " << static_cast<int>(RType) << " doesn't exist" << std::endl;
-        exit(405);
+        exit(401);
     }
 }
 
@@ -93,6 +93,29 @@ ConstantContainer Div(const ConstantContainer& rLeft, const ConstantContainer& r
 }
 
 template <ConstantType LType, ConstantType RType>
+ConstantContainer Mod(const ConstantContainer& rLeft, const ConstantContainer& rRight)
+{
+    using TLeft = ConstantTrait<LType>::cpp;
+    using TRight = ConstantTrait<RType>::cpp;
+
+    TLeft left = ConstantTrait<LType>::get(rLeft);
+    TRight right = ConstantTrait<RType>::get(rRight);
+
+    if constexpr(requires{ left % right; })
+    {
+        auto result = left % right;
+
+        using resultType = decltype(result);
+        return ConstantTrait<ToEnum<resultType>::value>::make(result);
+    }
+    else
+    {
+        std::cout << "Mod between: " << static_cast<int>(LType) << " and: " << static_cast<int>(RType) << " doesn't exist" << std::endl;
+        exit(409);
+    }
+}
+
+template <ConstantType LType, ConstantType RType>
 ConstantContainer Pow(const ConstantContainer& rLeft, const ConstantContainer& rRight)
 {
     using TLeft = ConstantTrait<LType>::cpp;
@@ -114,6 +137,27 @@ ConstantContainer Pow(const ConstantContainer& rLeft, const ConstantContainer& r
     {
         std::cout << "Pow between: " << static_cast<int>(LType) << " and: " << static_cast<int>(RType) << " doesn't exist" << std::endl;
         exit(409);
+    }
+}
+
+template <ConstantType LType>
+ConstantContainer Neg(const ConstantContainer& rLeft)
+{
+    using TLeft = ConstantTrait<LType>::cpp;
+
+    TLeft left = ConstantTrait<LType>::get(rLeft);
+
+    if constexpr(requires{ -left; })
+    {
+        auto result = -left;
+
+        using resultType = decltype(result);
+        return ConstantTrait<ToEnum<resultType>::value>::make(result);
+    }
+    else
+    {
+        std::cout << "Neg for: " << static_cast<int>(LType) << " doesn't exist" << std::endl;
+        exit(412);
     }
 }
 
@@ -205,6 +249,190 @@ ConstantContainer Not(const ConstantContainer &rLeft)
     {
         std::cout << "Not for: " << static_cast<int>(LType) << " doesn't exist" << std::endl;
         exit(412);
+    }
+}
+
+template <ConstantType LType, ConstantType RType>
+ConstantContainer Shl(const ConstantContainer& rLeft, const ConstantContainer& rRight)
+{
+    using TLeft = ConstantTrait<LType>::cpp;
+    using TRight = ConstantTrait<RType>::cpp;
+
+    TLeft left = ConstantTrait<LType>::get(rLeft);
+    TRight right = ConstantTrait<RType>::get(rRight);
+
+    if constexpr(requires{ left << right; })
+    {
+        auto result = left << right;
+
+        using resultType = decltype(result);
+        return ConstantTrait<ToEnum<resultType>::value>::make(result);
+    }
+    else
+    {
+        std::cout << "Left-shift between: " << static_cast<int>(LType) << " and: " << static_cast<int>(RType) << " doesn't exist" << std::endl;
+        exit(411);
+    }
+}
+
+template <ConstantType LType, ConstantType RType>
+ConstantContainer Shr(const ConstantContainer& rLeft, const ConstantContainer& rRight)
+{
+    using TLeft = ConstantTrait<LType>::cpp;
+    using TRight = ConstantTrait<RType>::cpp;
+
+    TLeft left = ConstantTrait<LType>::get(rLeft);
+    TRight right = ConstantTrait<RType>::get(rRight);
+
+    if constexpr(requires{ left >> right; })
+    {
+        auto result = left >> right;
+
+        using resultType = decltype(result);
+        return ConstantTrait<ToEnum<resultType>::value>::make(result);
+    }
+    else
+    {
+        std::cout << "Right-shift between: " << static_cast<int>(LType) << " and: " << static_cast<int>(RType) << " doesn't exist" << std::endl;
+        exit(411);
+    }
+}
+
+template <ConstantType LType, ConstantType RType>
+ConstantContainer CmpEq(const ConstantContainer& rLeft, const ConstantContainer& rRight)
+{
+    using TLeft = ConstantTrait<LType>::cpp;
+    using TRight = ConstantTrait<RType>::cpp;
+
+    TLeft left = ConstantTrait<LType>::get(rLeft);
+    TRight right = ConstantTrait<RType>::get(rRight);
+
+    if constexpr(requires{ left == right; })
+    {
+        auto result = left == right;
+
+        using resultType = decltype(result);
+        return ConstantTrait<ToEnum<resultType>::value>::make(result);
+    }
+    else
+    {
+        std::cout << "Is equal between: " << static_cast<int>(LType) << " and: " << static_cast<int>(RType) << " doesn't exist" << std::endl;
+        exit(411);
+    }
+}
+
+template <ConstantType LType, ConstantType RType>
+ConstantContainer CmpNe(const ConstantContainer& rLeft, const ConstantContainer& rRight)
+{
+    using TLeft = ConstantTrait<LType>::cpp;
+    using TRight = ConstantTrait<RType>::cpp;
+
+    TLeft left = ConstantTrait<LType>::get(rLeft);
+    TRight right = ConstantTrait<RType>::get(rRight);
+
+    if constexpr(requires{ left != right; })
+    {
+        auto result = left != right;
+
+        using resultType = decltype(result);
+        return ConstantTrait<ToEnum<resultType>::value>::make(result);
+    }
+    else
+    {
+        std::cout << "Is different between: " << static_cast<int>(LType) << " and: " << static_cast<int>(RType) << " doesn't exist" << std::endl;
+        exit(411);
+    }
+}
+
+template <ConstantType LType, ConstantType RType>
+ConstantContainer CmpLt(const ConstantContainer& rLeft, const ConstantContainer& rRight)
+{
+    using TLeft = ConstantTrait<LType>::cpp;
+    using TRight = ConstantTrait<RType>::cpp;
+
+    TLeft left = ConstantTrait<LType>::get(rLeft);
+    TRight right = ConstantTrait<RType>::get(rRight);
+
+    if constexpr(requires{ left < right; })
+    {
+        auto result = left < right;
+
+        using resultType = decltype(result);
+        return ConstantTrait<ToEnum<resultType>::value>::make(result);
+    }
+    else
+    {
+        std::cout << "Lesser than between: " << static_cast<int>(LType) << " and: " << static_cast<int>(RType) << " doesn't exist" << std::endl;
+        exit(411);
+    }
+}
+
+template <ConstantType LType, ConstantType RType>
+ConstantContainer CmpLe(const ConstantContainer& rLeft, const ConstantContainer& rRight)
+{
+    using TLeft = ConstantTrait<LType>::cpp;
+    using TRight = ConstantTrait<RType>::cpp;
+
+    TLeft left = ConstantTrait<LType>::get(rLeft);
+    TRight right = ConstantTrait<RType>::get(rRight);
+
+    if constexpr(requires{ left <= right; })
+    {
+        auto result = left <= right;
+
+        using resultType = decltype(result);
+        return ConstantTrait<ToEnum<resultType>::value>::make(result);
+    }
+    else
+    {
+        std::cout << "Lesser or equal between: " << static_cast<int>(LType) << " and: " << static_cast<int>(RType) << " doesn't exist" << std::endl;
+        exit(411);
+    }
+}
+
+template <ConstantType LType, ConstantType RType>
+ConstantContainer CmpGt(const ConstantContainer& rLeft, const ConstantContainer& rRight)
+{
+    using TLeft = ConstantTrait<LType>::cpp;
+    using TRight = ConstantTrait<RType>::cpp;
+
+    TLeft left = ConstantTrait<LType>::get(rLeft);
+    TRight right = ConstantTrait<RType>::get(rRight);
+
+    if constexpr(requires{ left > right; })
+    {
+        auto result = left > right;
+
+        using resultType = decltype(result);
+        return ConstantTrait<ToEnum<resultType>::value>::make(result);
+    }
+    else
+    {
+        std::cout << "Greater than between: " << static_cast<int>(LType) << " and: " << static_cast<int>(RType) << " doesn't exist" << std::endl;
+        exit(411);
+    }
+}
+
+template <ConstantType LType, ConstantType RType>
+ConstantContainer CmpGe(const ConstantContainer& rLeft, const ConstantContainer& rRight)
+{
+    using TLeft = ConstantTrait<LType>::cpp;
+    using TRight = ConstantTrait<RType>::cpp;
+
+    TLeft left = ConstantTrait<LType>::get(rLeft);
+    TRight right = ConstantTrait<RType>::get(rRight);
+
+    if constexpr(requires{ left >= right; })
+    {
+        auto result = left >= right;
+
+        using resultType = decltype(result);
+        return ConstantTrait<ToEnum<resultType>::value>::make(result);
+    }
+    else
+    {
+        std::cout << "Greater or equal between: " << static_cast<int>(LType) << " and: " << static_cast<int>(RType) << " doesn't exist" << std::endl;
+        exit(411);
     }
 }
 

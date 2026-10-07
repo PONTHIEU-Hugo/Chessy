@@ -17,7 +17,13 @@ template <ConstantType LType, ConstantType RType>
 ConstantContainer Div(const ConstantContainer& rLeft, const ConstantContainer& rRight);
 
 template <ConstantType LType, ConstantType RType>
+ConstantContainer Mod(const ConstantContainer& rLeft, const ConstantContainer& rRight);
+
+template <ConstantType LType, ConstantType RType>
 ConstantContainer Pow(const ConstantContainer& rLeft, const ConstantContainer& rRight);
+
+template <ConstantType LType>
+ConstantContainer Neg(const ConstantContainer& rLeft);
 
 
 template <ConstantType LType, ConstantType RType>
@@ -31,6 +37,30 @@ ConstantContainer Xor(const ConstantContainer& rLeft, const ConstantContainer& r
 
 template <ConstantType LType>
 ConstantContainer Not(const ConstantContainer& rLeft);
+
+template <ConstantType LType, ConstantType RType>
+ConstantContainer Shl(const ConstantContainer& rLeft, const ConstantContainer& rRight);
+
+template <ConstantType LType, ConstantType RType>
+ConstantContainer Shr(const ConstantContainer& rLeft, const ConstantContainer& rRight);
+
+template <ConstantType LType, ConstantType RType>
+ConstantContainer CmpEq(const ConstantContainer& rLeft, const ConstantContainer& rRight);
+
+template <ConstantType LType, ConstantType RType>
+ConstantContainer CmpNe(const ConstantContainer& rLeft, const ConstantContainer& rRight);
+
+template <ConstantType LType, ConstantType RType>
+ConstantContainer CmpLt(const ConstantContainer& rLeft, const ConstantContainer& rRight);
+
+template <ConstantType LType, ConstantType RType>
+ConstantContainer CmpLe(const ConstantContainer& rLeft, const ConstantContainer& rRight);
+
+template <ConstantType LType, ConstantType RType>
+ConstantContainer CmpGt(const ConstantContainer& rLeft, const ConstantContainer& rRight);
+
+template <ConstantType LType, ConstantType RType>
+ConstantContainer CmpGe(const ConstantContainer& rLeft, const ConstantContainer& rRight);
 
 
 template <ConstantType LType>

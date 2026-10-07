@@ -25,7 +25,7 @@ int main()
 
     newChunk.push_instruction({OpCode::_PRINT, 2});
 
-    newChunk.push_instruction({OpCode::_END});
+    newChunk.push_instruction({OpCode::_HALT});
 
     VM vm;
     vm.SetChunk(&newChunk);

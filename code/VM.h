@@ -21,10 +21,18 @@ inline static constexpr array<array<OperationPtr, TABLE_COUNT>, TABLE_COUNT> DIV
     std::make_index_sequence<TABLE_COUNT>{},
     std::make_index_sequence<TABLE_COUNT>{}
 );
+inline static constexpr array<array<OperationPtr, TABLE_COUNT>, TABLE_COUNT> MOD_TABLE = CreateModTable(
+    std::make_index_sequence<TABLE_COUNT>{},
+    std::make_index_sequence<TABLE_COUNT>{}
+);
 inline static constexpr array<array<OperationPtr, TABLE_COUNT>, TABLE_COUNT> POW_TABLE = CreatePowTable(
     std::make_index_sequence<TABLE_COUNT>{},
     std::make_index_sequence<TABLE_COUNT>{}
 );
+inline static constexpr array<OperationPtrSolo, TABLE_COUNT> NEG_TABLE = CreateNegTable(
+    std::make_index_sequence<TABLE_COUNT>{}
+);
+
 inline static constexpr array<array<OperationPtr, TABLE_COUNT>, TABLE_COUNT> AND_TABLE = CreateAndTable(
     std::make_index_sequence<TABLE_COUNT>{},
     std::make_index_sequence<TABLE_COUNT>{}
@@ -40,6 +48,39 @@ inline static constexpr array<array<OperationPtr, TABLE_COUNT>, TABLE_COUNT> XOR
 inline static constexpr array<OperationPtrSolo, TABLE_COUNT> NOT_TABLE = CreateNotTable(
     std::make_index_sequence<TABLE_COUNT>{}
 );
+inline static constexpr array<array<OperationPtr, TABLE_COUNT>, TABLE_COUNT> SHL_TABLE = CreateShlTable(
+    std::make_index_sequence<TABLE_COUNT>{},
+    std::make_index_sequence<TABLE_COUNT>{}
+);
+inline static constexpr array<array<OperationPtr, TABLE_COUNT>, TABLE_COUNT> SHR_TABLE = CreateShrTable(
+    std::make_index_sequence<TABLE_COUNT>{},
+    std::make_index_sequence<TABLE_COUNT>{}
+);
+inline static constexpr array<array<OperationPtr, TABLE_COUNT>, TABLE_COUNT> CMPEQ_TABLE = CreateCmpEqTable(
+    std::make_index_sequence<TABLE_COUNT>{},
+    std::make_index_sequence<TABLE_COUNT>{}
+);
+inline static constexpr array<array<OperationPtr, TABLE_COUNT>, TABLE_COUNT> CMPNE_TABLE = CreateCmpNeTable(
+    std::make_index_sequence<TABLE_COUNT>{},
+    std::make_index_sequence<TABLE_COUNT>{}
+);
+inline static constexpr array<array<OperationPtr, TABLE_COUNT>, TABLE_COUNT> CMPLT_TABLE = CreateCmpLtTable(
+    std::make_index_sequence<TABLE_COUNT>{},
+    std::make_index_sequence<TABLE_COUNT>{}
+);
+inline static constexpr array<array<OperationPtr, TABLE_COUNT>, TABLE_COUNT> CMPLE_TABLE = CreateCmpLeTable(
+    std::make_index_sequence<TABLE_COUNT>{},
+    std::make_index_sequence<TABLE_COUNT>{}
+);
+inline static constexpr array<array<OperationPtr, TABLE_COUNT>, TABLE_COUNT> CMPGT_TABLE = CreateCmpGtTable(
+    std::make_index_sequence<TABLE_COUNT>{},
+    std::make_index_sequence<TABLE_COUNT>{}
+);
+inline static constexpr array<array<OperationPtr, TABLE_COUNT>, TABLE_COUNT> CMPGE_TABLE = CreateCmpGeTable(
+    std::make_index_sequence<TABLE_COUNT>{},
+    std::make_index_sequence<TABLE_COUNT>{}
+);
+
 inline static constexpr array<NoReturnOperationPtrSolo, TABLE_COUNT> PRINT_TABLE = CreatePrintTable(
     std::make_index_sequence<TABLE_COUNT>{}
 );
@@ -51,6 +92,7 @@ class VM
 {
 private:
 	array<ConstantContainer, registerAmount> m_Registers;
+    vector<ConstantContainer> m_Stack;
 
 	size m_InstructionIndex;
 

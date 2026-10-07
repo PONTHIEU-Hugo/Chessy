@@ -72,6 +72,24 @@ constexpr array<array<OperationPtr, sizeof...(jSize)>, sizeof...(iSize)> CreateD
 }
 
 
+// Mod type
+template<size iSize, size... jSize>
+constexpr array<OperationPtr, sizeof...(jSize)> CreateModLine(std::index_sequence<jSize...>)
+{
+    return array<OperationPtr, sizeof...(jSize)>{
+        &Mod<static_cast<ConstantType>(iSize), static_cast<ConstantType>(jSize)>...
+    };
+}
+
+template<size... iSize, size... jSize>
+constexpr array<array<OperationPtr, sizeof...(jSize)>, sizeof...(iSize)> CreateModTable(std::index_sequence<iSize...>, std::index_sequence<jSize...> js)
+{
+    return array<array<OperationPtr, sizeof...(jSize)>, sizeof...(iSize)>{
+        CreateModLine<iSize>(js)...
+    };
+}
+
+
 // Pow type
 template<size iSize, size... jSize>
 constexpr array<OperationPtr, sizeof...(jSize)> CreatePowLine(std::index_sequence<jSize...>)
@@ -88,6 +106,17 @@ constexpr array<array<OperationPtr, sizeof...(jSize)>, sizeof...(iSize)> CreateP
         CreatePowLine<iSize>(js)...
     };
 }
+
+
+// Neg type
+template<size... iSize>
+constexpr array<OperationPtrSolo, sizeof...(iSize)> CreateNegTable(std::index_sequence<iSize...>)
+{
+    return array<OperationPtrSolo, sizeof...(iSize)>{
+        &Neg<static_cast<ConstantType>(iSize)>...
+    };
+}
+
 
 
 // And type
@@ -152,6 +181,151 @@ constexpr array<OperationPtrSolo, sizeof...(iSize)> CreateNotTable(std::index_se
         &Not<static_cast<ConstantType>(iSize)>...
     };
 }
+
+
+// Shl type
+template<size iSize, size... jSize>
+constexpr array<OperationPtr, sizeof...(jSize)> CreateShlLine(std::index_sequence<jSize...>)
+{
+    return array<OperationPtr, sizeof...(jSize)>{
+        &Shl<static_cast<ConstantType>(iSize), static_cast<ConstantType>(jSize)>...
+    };
+}
+
+template<size... iSize, size... jSize>
+constexpr array<array<OperationPtr, sizeof...(jSize)>, sizeof...(iSize)> CreateShlTable(std::index_sequence<iSize...>, std::index_sequence<jSize...> js)
+{
+    return array<array<OperationPtr, sizeof...(jSize)>, sizeof...(iSize)>{
+        CreateShlLine<iSize>(js)...
+    };
+}
+
+
+// Shr type
+template<size iSize, size... jSize>
+constexpr array<OperationPtr, sizeof...(jSize)> CreateShrLine(std::index_sequence<jSize...>)
+{
+    return array<OperationPtr, sizeof...(jSize)>{
+        &Shr<static_cast<ConstantType>(iSize), static_cast<ConstantType>(jSize)>...
+    };
+}
+
+template<size... iSize, size... jSize>
+constexpr array<array<OperationPtr, sizeof...(jSize)>, sizeof...(iSize)> CreateShrTable(std::index_sequence<iSize...>, std::index_sequence<jSize...> js)
+{
+    return array<array<OperationPtr, sizeof...(jSize)>, sizeof...(iSize)>{
+        CreateShrLine<iSize>(js)...
+    };
+}
+
+
+// Is Equal type
+template<size iSize, size... jSize>
+constexpr array<OperationPtr, sizeof...(jSize)> CreateCmpEqLine(std::index_sequence<jSize...>)
+{
+    return array<OperationPtr, sizeof...(jSize)>{
+        &CmpEq<static_cast<ConstantType>(iSize), static_cast<ConstantType>(jSize)>...
+    };
+}
+
+template<size... iSize, size... jSize>
+constexpr array<array<OperationPtr, sizeof...(jSize)>, sizeof...(iSize)> CreateCmpEqTable(std::index_sequence<iSize...>, std::index_sequence<jSize...> js)
+{
+    return array<array<OperationPtr, sizeof...(jSize)>, sizeof...(iSize)>{
+        CreateCmpEqLine<iSize>(js)...
+    };
+}
+
+
+// Is Different type
+template<size iSize, size... jSize>
+constexpr array<OperationPtr, sizeof...(jSize)> CreateCmpNeLine(std::index_sequence<jSize...>)
+{
+    return array<OperationPtr, sizeof...(jSize)>{
+        &CmpNe<static_cast<ConstantType>(iSize), static_cast<ConstantType>(jSize)>...
+    };
+}
+
+template<size... iSize, size... jSize>
+constexpr array<array<OperationPtr, sizeof...(jSize)>, sizeof...(iSize)> CreateCmpNeTable(std::index_sequence<iSize...>, std::index_sequence<jSize...> js)
+{
+    return array<array<OperationPtr, sizeof...(jSize)>, sizeof...(iSize)>{
+        CreateCmpNeLine<iSize>(js)...
+    };
+}
+
+
+// Lesser Than type
+template<size iSize, size... jSize>
+constexpr array<OperationPtr, sizeof...(jSize)> CreateCmpLtLine(std::index_sequence<jSize...>)
+{
+    return array<OperationPtr, sizeof...(jSize)>{
+        &CmpLt<static_cast<ConstantType>(iSize), static_cast<ConstantType>(jSize)>...
+    };
+}
+
+template<size... iSize, size... jSize>
+constexpr array<array<OperationPtr, sizeof...(jSize)>, sizeof...(iSize)> CreateCmpLtTable(std::index_sequence<iSize...>, std::index_sequence<jSize...> js)
+{
+    return array<array<OperationPtr, sizeof...(jSize)>, sizeof...(iSize)>{
+        CreateCmpLtLine<iSize>(js)...
+    };
+}
+
+
+// Lesser or Equal type
+template<size iSize, size... jSize>
+constexpr array<OperationPtr, sizeof...(jSize)> CreateCmpLeLine(std::index_sequence<jSize...>)
+{
+    return array<OperationPtr, sizeof...(jSize)>{
+        &CmpLe<static_cast<ConstantType>(iSize), static_cast<ConstantType>(jSize)>...
+    };
+}
+
+template<size... iSize, size... jSize>
+constexpr array<array<OperationPtr, sizeof...(jSize)>, sizeof...(iSize)> CreateCmpLeTable(std::index_sequence<iSize...>, std::index_sequence<jSize...> js)
+{
+    return array<array<OperationPtr, sizeof...(jSize)>, sizeof...(iSize)>{
+        CreateCmpLeLine<iSize>(js)...
+    };
+}
+
+
+// Greater Than type
+template<size iSize, size... jSize>
+constexpr array<OperationPtr, sizeof...(jSize)> CreateCmpGtLine(std::index_sequence<jSize...>)
+{
+    return array<OperationPtr, sizeof...(jSize)>{
+        &CmpGt<static_cast<ConstantType>(iSize), static_cast<ConstantType>(jSize)>...
+    };
+}
+
+template<size... iSize, size... jSize>
+constexpr array<array<OperationPtr, sizeof...(jSize)>, sizeof...(iSize)> CreateCmpGtTable(std::index_sequence<iSize...>, std::index_sequence<jSize...> js)
+{
+    return array<array<OperationPtr, sizeof...(jSize)>, sizeof...(iSize)>{
+        CreateCmpGtLine<iSize>(js)...
+    };
+}
+
+
+// Greater or Equal type
+template<size iSize, size... jSize>
+constexpr array<OperationPtr, sizeof...(jSize)> CreateCmpGeLine(std::index_sequence<jSize...>)
+{
+    return array<OperationPtr, sizeof...(jSize)>{
+        &CmpGe<static_cast<ConstantType>(iSize), static_cast<ConstantType>(jSize)>...
+    };
+}
+
+template<size... iSize, size... jSize>
+constexpr array<array<OperationPtr, sizeof...(jSize)>, sizeof...(iSize)> CreateCmpGeTable(std::index_sequence<iSize...>, std::index_sequence<jSize...> js)
+{
+    return array<array<OperationPtr, sizeof...(jSize)>, sizeof...(iSize)>{
+        CreateCmpGeLine<iSize>(js)...
+    };
+}
+
 
 
 // Print type
