@@ -14,9 +14,9 @@ template <> struct ExpressionTraits<ExpressionType::_FUNCTION_DECLARATION>{ usin
 template <> struct ExpressionTraits<ExpressionType::_FUNCTION_CALL>       { using type = FunctionCallExpression; };
 template <> struct ExpressionTraits<ExpressionType::_PARAMETER>           { using type = ParameterExpression; };
 template <> struct ExpressionTraits<ExpressionType::_VARIABLE_DECLARATION>{ using type = VariableDeclarationExpression; };
-template <> struct ExpressionTraits<ExpressionType::_RETURN>              { using type = ReturnStatementExpression; };
+template <> struct ExpressionTraits<ExpressionType::_RETURN>              { using type = ReturnExpression; };
 template <> struct ExpressionTraits<ExpressionType::_DO_WHILE>            { using type = DoWhileExpression; };
-template <> struct ExpressionTraits<ExpressionType::_VARIABLE_ASSIGNMENT> { using type = VariableAssignment; };
+template <> struct ExpressionTraits<ExpressionType::_VARIABLE_ASSIGNMENT> { using type = VariableAssignmentExpression; };
 template <> struct ExpressionTraits<ExpressionType::_IF>                  { using type = IfExpression; };
 template <> struct ExpressionTraits<ExpressionType::_COMMENT>             { using type = CommentExpression; };
 

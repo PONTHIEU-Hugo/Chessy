@@ -3,6 +3,9 @@ add_library(chessy_core STATIC
     Token.cpp
     Lexer.cpp
     Parser.cpp
+    Scope.cpp
+    Analyser.cpp
+    Compiler.cpp
     Chunk.cpp
     VM.cpp
 )

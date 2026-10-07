@@ -75,6 +75,7 @@ Token& Parser::Peek(int indexOffset, bool jumpLineToken)
 ProgramExpression* Parser::ParseProgram()
 {
     ProgramExpression* programExp = new ProgramExpression();
+    programExp->SetLineCol(0,0);
     while (m_tokenIndex < m_tokens.size())
     {
         Expression* exp = ParseDeclaration();
@@ -101,9 +102,10 @@ Expression* Parser::ParseDeclaration()
 
 BlockExpression* Parser::ParseBlock()
 {
-    Consume(TokenType::_L_BRACE);
+    Token& t = Consume(TokenType::_L_BRACE);
 
     BlockExpression* block = new BlockExpression();
+    block->SetLineCol(t.line,t.column);
 
     while (Peek().type != TokenType::_R_BRACE)
     {
@@ -122,7 +124,8 @@ BlockExpression* Parser::ParseBlock()
 FunctionDeclarationExpression* Parser::ParseFunctionDeclaration()
 {
     FunctionDeclarationExpression* func = new FunctionDeclarationExpression();
-    Consume(TokenType::_FUNC);
+    Token& t = Consume(TokenType::_FUNC);
+    func->SetLineCol(t.line,t.column);
 
     func->functionName = new IdentifierExpression(Consume(TokenType::_SYMBOL));
 
@@ -155,7 +158,10 @@ FunctionCallExpression* Parser::ParseFunctionCall()
 {
     FunctionCallExpression* call = new FunctionCallExpression();
 
-    call->name = new IdentifierExpression(Consume(TokenType::_SYMBOL));
+    Token& t = Consume(TokenType::_SYMBOL);
+    call->SetLineCol(t.line,t.column);
+
+    call->name = new IdentifierExpression(t);
 
     Consume(TokenType::_L_PARENTHESE);
 
@@ -178,7 +184,9 @@ ParameterExpression* Parser::ParseParameter()
 {
     ParameterExpression* param = new ParameterExpression();
     param->paramType = ParseType();
-    param->name = new IdentifierExpression(Consume(TokenType::_SYMBOL));
+    Token& t = Consume(TokenType::_SYMBOL);
+    param->SetLineCol(t.line,t.column);
+    param->name = new IdentifierExpression(t);
     return param;
 }
 
@@ -186,8 +194,9 @@ VariableDeclarationExpression* Parser::ParseVariableDeclaration()
 {
     VariableDeclarationExpression* variableDec = new VariableDeclarationExpression();
     variableDec->varType = ParseType();
-    variableDec->name = new IdentifierExpression(Consume(TokenType::_SYMBOL));
-
+    Token& t = Consume(TokenType::_SYMBOL);
+    variableDec->SetLineCol(t.line,t.column);
+    variableDec->name = new IdentifierExpression(t);
     if (Peek().type == TokenType::_EQUAL)
     {
         Consume(TokenType::_EQUAL);
@@ -195,6 +204,19 @@ VariableDeclarationExpression* Parser::ParseVariableDeclaration()
     }
 
     return variableDec;
+}
+
+VariableAssignmentExpression *Parser::ParseVariableAssignment()
+{
+    VariableAssignmentExpression* variableAssign = new VariableAssignmentExpression();
+    Token& t = Consume(TokenType::_SYMBOL);
+    variableAssign->SetLineCol(t.line,t.column);
+    variableAssign->name = new IdentifierExpression(t);
+
+    Consume(TokenType::_EQUAL);
+    variableAssign->value = ParseExpression();
+
+    return variableAssign;
 }
 
 TypeExpression* Parser::ParseType()
@@ -209,21 +231,23 @@ TypeExpression* Parser::ParseType()
     return typeExpr;
 }
 
-ReturnStatementExpression* Parser::ParseReturnStatement()
+ReturnExpression* Parser::ParseReturn()
 {
-    ReturnStatementExpression* returnStatement = new ReturnStatementExpression();
-    Consume(TokenType::_RETURN);
+    ReturnExpression* ret = new ReturnExpression();
+    Token& t = Consume(TokenType::_RETURN);
+    ret->SetLineCol(t.line,t.column);
     if (Peek().type == TokenType::_SEMI_COLON)
-        return returnStatement;
+        return ret;
 
-    returnStatement->value = ParseExpression();
-    return returnStatement;
+    ret->value = ParseExpression();
+    return ret;
 }
 
 DoWhileExpression* Parser::ParseDoWhile()
 {
     DoWhileExpression* doWhile = new DoWhileExpression();
-    Consume(TokenType::_DO);
+    Token& t = Consume(TokenType::_DO);
+    doWhile->SetLineCol(t.line,t.column);
     doWhile->block = ParseBlock();
     Consume(TokenType::_WHILE);
     Consume(TokenType::_L_PARENTHESE);
@@ -235,8 +259,8 @@ DoWhileExpression* Parser::ParseDoWhile()
 IfExpression* Parser::ParseIf()
 {
     IfExpression* ifExpression = new IfExpression();
-
-    Consume(TokenType::_IF);
+    Token& t = Consume(TokenType::_IF);
+    ifExpression->SetLineCol(t.line,t.column);
     Consume(TokenType::_L_PARENTHESE);
     ifExpression->condition = ParseExpression();
     Consume(TokenType::_R_PARENTHESE);
@@ -250,7 +274,8 @@ CommentExpression* Parser::ParseComment()
     CommentExpression* comment = new CommentExpression();
     comment->comment = "";
 
-    Consume(TokenType::_COMMENTARY);
+    Token& t = Consume(TokenType::_COMMENTARY);
+    comment->SetLineCol(t.line,t.column);
 
     while (Peek().type != TokenType::_END_LINE)
     {
@@ -302,6 +327,9 @@ Expression* Parser::ParsePrefix()
         if (Peek(1).type == TokenType::_L_PARENTHESE)
             return ParseFunctionCall();
 
+        if (Peek(1).type == TokenType::_EQUAL)
+            return ParseVariableAssignment();
+
         Consume(TokenType::_SYMBOL);
         return new IdentifierExpression(token);
     }
@@ -336,7 +364,7 @@ Expression* Parser::ParsePrefix()
 
     if (token.type == TokenType::_RETURN)
     {
-        return ParseReturnStatement();
+        return ParseReturn();
     }
 
     if (token.type == TokenType::_NOT_OP || token.type == TokenType::_SUB || token.type == TokenType::_ADD)

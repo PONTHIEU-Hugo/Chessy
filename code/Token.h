@@ -51,7 +51,9 @@ enum class TokenType : u8
     _DOUBLE_QUOTE,                   // "
     _COMMENTARY,                    // //
     _CR, _LF,                       // \r, \n
-    _END_LINE                       // \r\n
+    _END_LINE,                       // \r\n
+
+    _DEFAULT
 };
 
 struct Token

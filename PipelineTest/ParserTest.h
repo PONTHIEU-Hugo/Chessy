@@ -19,5 +19,6 @@ public:
     static void AssertLiteral(Expression* e, TokenType type, const char* msg);
     static BinaryExpression* AssertBinary(Expression* e, TokenType op, const char* msg);
     static VariableDeclarationExpression* AssertVarDecl(Expression* e, TokenType type, const char* name, const char* msg);
+    static VariableAssignmentExpression* AssertVarAssign(Expression* e, const char* name, const char* msg);
     static FunctionDeclarationExpression* GetSingleMainFunction(ProgramExpression* program, const char* file);
 };
