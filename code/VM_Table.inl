@@ -325,14 +325,3 @@ constexpr array<array<OperationPtr, sizeof...(jSize)>, sizeof...(iSize)> CreateC
         CreateCmpGeLine<iSize>(js)...
     };
 }
-
-
-
-// Print type
-template<size... iSize>
-constexpr array<NoReturnOperationPtrSolo, sizeof...(iSize)> CreatePrintTable(std::index_sequence<iSize...>)
-{
-    return array<NoReturnOperationPtrSolo, sizeof...(iSize)>{
-        &Print<static_cast<ConstantType>(iSize)>...
-    };
-}

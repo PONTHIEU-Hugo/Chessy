@@ -1,6 +1,6 @@
 func main()
 {
-    i8 test = 1;
+    I8 test = 1;
     do 
     {
         test = test + 1;

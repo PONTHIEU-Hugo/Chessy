@@ -1,12 +1,63 @@
-func Add(i32 a, i32 b) : i32
-{
-    return a + b; 
+func Evaluate() : I32 {
+    I32 score = 0;
+    score = score + PopCount(Pieces(PieceWhitePawn()))   * 100;
+    score = score + PopCount(Pieces(PieceWhiteKnight())) * 320;
+    score = score + PopCount(Pieces(PieceWhiteBishop())) * 330;
+    score = score + PopCount(Pieces(PieceWhiteRook()))   * 500;
+    score = score + PopCount(Pieces(PieceWhiteQueen()))  * 900;
+    score = score - PopCount(Pieces(PieceBlackPawn()))   * 100;
+    score = score - PopCount(Pieces(PieceBlackKnight())) * 320;
+    score = score - PopCount(Pieces(PieceBlackBishop())) * 330;
+    score = score - PopCount(Pieces(PieceBlackRook()))   * 500;
+    score = score - PopCount(Pieces(PieceBlackQueen()))  * 900;
+    if (SideToMove() == 0) {
+        return score;
+    }
+    return -score;
 }
 
-func main()
-{
-    i32 x = 50;
-    i32 y = 45;
-    i16 z = 20;
-    Add(x, y);
+func AlphaBeta(I32 depth, I32 alpha, I32 beta) : I32 {
+    if (depth == 0) {
+        return Evaluate();
+    }
+    
+    Generate();
+    I32 moveTotal = MoveCount();
+    if (moveTotal == 0) {
+        return Evaluate();
+    }
+    
+    I32 bestScore = -1000000;
+    I32 moveIndex = 0;
+    
+    do {
+        Move currentMove = MoveAt(moveIndex);
+        MakeMove(currentMove);
+        I32 score = -AlphaBeta(depth - 1, -beta, -alpha);
+        UnmakeMove();
+        
+        if (score > bestScore) {
+            bestScore = score;
+        }
+        if (score > alpha) {
+            alpha = score;
+        }
+        if (alpha >= beta) {
+            moveIndex = moveTotal;
+        }
+        moveIndex = moveIndex + 1;
+    } while (moveIndex < moveTotal);
+    
+    return bestScore;
+}
+
+func Main() {
+    NewBoard();
+    
+    I64 startTime = NowMs();
+    I32 result = AlphaBeta(5, -1000000, 1000000);
+    I64 endTime = NowMs();
+    
+    Print(result);
+    Print(endTime - startTime);
 }

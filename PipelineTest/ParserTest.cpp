@@ -124,7 +124,7 @@ void ParserTest::TestDeclaration()
     auto* v10 = AssertVarDecl(stmts[10], TokenType::_BITBOARD, "test_bitboard", "stmt10 bitboard");
     if (v10) CompilationTest::Assert(v10->value == nullptr, "stmt10 no value");
 
-    auto* v11 = AssertVarDecl(stmts[11], TokenType::_POSITION, "test_position", "stmt11 position");
+    auto* v11 = AssertVarDecl(stmts[11], TokenType::_SQUARE, "test_square", "stmt11 position");
     if (v11) CompilationTest::Assert(v11->value == nullptr, "stmt11 no value");
 
     auto* v12 = AssertVarDecl(stmts[12], TokenType::_PIECE, "test_piece", "stmt12 piece");

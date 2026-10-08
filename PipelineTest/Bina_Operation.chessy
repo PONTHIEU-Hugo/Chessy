@@ -1,10 +1,10 @@
 func main()
 {
-    i32 tester1 = 5;
-    i32 tester2 = 2;
+    I32 tester1 = 5;
+    I32 tester2 = 2;
 
     // Binary operations
-    i32 result = tester1 | tester2;
+    I32 result = tester1 | tester2;
     result = tester1 ^ tester2;
     result = tester1 & tester2;
     result = !result;

@@ -7,6 +7,7 @@ add_library(chessy_core STATIC
     Analyser.cpp
     Compiler.cpp
     Chunk.cpp
+    ChessNative.cpp
     VM.cpp
 )
 target_include_directories(chessy_core PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})

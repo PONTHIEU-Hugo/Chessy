@@ -5,8 +5,10 @@ enum class OpCode : u8
 {
     _MOV,      
     _LOADC,    
-    _LOAD,      
-    _STORE,      
+    _LOAD,  
+    _LOADG,    
+    _STORE,   
+    _STOREG,   
     _PUSH,      
     _POP,        
 
@@ -23,9 +25,9 @@ enum class OpCode : u8
     _JNZ,       
 
 
-    _CALL,       
+    _CALL,  
+    _CALL_NATIVE,     
     _RET,      
 
-    _PRINT,
-    _HALT,
+    _HALT
 };

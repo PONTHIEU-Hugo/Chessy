@@ -92,7 +92,7 @@ void LexerTest::TestDeclaration()
     CompilationTest::Assert(tokens[57].globalType == GlobalTokenType::_DELIMITOR  && tokens[57].type == TokenType::_SEMI_COLON);
 
     // position test_position;
-    CompilationTest::Assert(tokens[58].globalType == GlobalTokenType::_IDENTIFIER && tokens[58].type == TokenType::_POSITION);
+    CompilationTest::Assert(tokens[58].globalType == GlobalTokenType::_IDENTIFIER && tokens[58].type == TokenType::_SQUARE);
     CompilationTest::Assert(tokens[59].globalType == GlobalTokenType::_IDENTIFIER && tokens[59].type == TokenType::_SYMBOL);
     CompilationTest::Assert(tokens[60].globalType == GlobalTokenType::_DELIMITOR  && tokens[60].type == TokenType::_SEMI_COLON);
 

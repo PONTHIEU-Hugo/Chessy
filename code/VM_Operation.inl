@@ -436,21 +436,8 @@ ConstantContainer CmpGe(const ConstantContainer& rLeft, const ConstantContainer&
     }
 }
 
-
-template <ConstantType LType>
-void Print(const ConstantContainer &rLeft)
+template <>
+inline ConstantContainer Not<ConstantType::_BOOL>(const ConstantContainer& rLeft)
 {
-    using TLeft = ConstantTrait<LType>::cpp;
-
-    TLeft left = ConstantTrait<LType>::get(rLeft);
-
-    if constexpr(requires{ std::cout << left << std::endl; })
-    {
-        std::cout << left << std::endl;
-    }
-    else
-    {
-        std::cout << "Print for: " << static_cast<int>(LType) << " doesn't exist" << std::endl;
-        exit(413);
-    }
+    return ConstantTrait<ConstantType::_BOOL>::make(!rLeft.data.as_bool);
 }

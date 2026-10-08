@@ -10,6 +10,7 @@ private:
 	vector<Instruction> instructions;
 	vector<ConstantContainer> constants;
 	vector<FunctionInfo> functions;
+    size globalSlotCountValue = 0;
 
 public:
 	size push_instruction(const Instruction instructionCode);
@@ -22,4 +23,7 @@ public:
 
 	size instruction_size() { return instructions.size(); }
 	size constant_size() const { return constants.size(); }
+
+	void set_global_slot_count(const size count) { globalSlotCountValue = count; }
+    size global_slot_count() const { return globalSlotCountValue; }
 };

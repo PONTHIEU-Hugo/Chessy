@@ -2,8 +2,9 @@
 #include "Defines.h"
 #include "Bitboard.h"
 #include "Piece.h"
-#include "Position.h"
+#include "Square.h"
 #include "Move.h"
+#include "Board.h"
 
 enum class ConstantType : u8
 {
@@ -12,7 +13,7 @@ enum class ConstantType : u8
     _U8, _U16, _U32, _U64,
     _STRING,
     _BITBOARD, _PIECE,
-    _POSITION, _MOVE,
+    _SQUARE, _MOVE,
 
     _COUNT
 };
@@ -39,7 +40,7 @@ public:
 
         Bitboard as_bitboard;
         Piece as_piece;
-        Position as_position;
+        Square as_square;
         Move as_move;
     } data;
 };

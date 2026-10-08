@@ -24,7 +24,8 @@ enum class TokenType : u8
     _U8, _U16, _U32, _U64,
     _STRING_IDENTIFIER,
     _BITBOARD, _PIECE,
-    _POSITION, _MOVE,
+    _SQUARE, _MOVE,
+    _BOARD,
 
     // Operands
     _EQUAL,
@@ -53,6 +54,7 @@ enum class TokenType : u8
     _CR, _LF,                       // \r, \n
     _END_LINE,                       // \r\n
 
+    _ANY,
     _DEFAULT
 };
 

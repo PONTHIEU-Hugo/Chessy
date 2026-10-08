@@ -17,8 +17,9 @@ public:
 struct VarSymbol : public Symbol
 {
 public:
-    int m_slot = -1; // ? maybe 
+    int m_slot = -1;
     TokenType varType;
+    bool isGlobal = false; 
     VarSymbol(TokenType vType) : varType(vType)
     {
         type = SymbolType::_VAR;
@@ -28,12 +29,14 @@ public:
 struct FuncSymbol : public Symbol
 {
 public:
-    int slot_count;
+    int slot_count = 0;
     vector<TokenType> paramsType;
     TokenType returnType = TokenType::_DEFAULT;
     size function_index = -1;
-    FuncSymbol()
-    {
+    bool isBuiltin = false;
+    bool hasReturn = true;
+    FuncSymbol() 
+    { 
         type = SymbolType::_FUNC;
     }
 };

@@ -48,6 +48,9 @@ private:
 
     void AddScope(FunctionDeclarationExpression* func = nullptr);
     void PopScope(bool popFunc = false);
+
+    bool IsAssignable(TokenType fromType, TokenType toType);
+
 private:
     std::vector<Scope*> m_scopes;
     std::vector<AnalyserError> m_errors;

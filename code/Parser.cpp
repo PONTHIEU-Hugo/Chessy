@@ -5,7 +5,8 @@ un_set<TokenType> Parser::s_typeTokens = {
     TokenType::_I8, TokenType::_I16, TokenType::_I32, TokenType::_I64,
     TokenType::_U8, TokenType::_U16, TokenType::_U32, TokenType::_U64,
     TokenType::_BITBOARD, TokenType::_PIECE,
-    TokenType::_POSITION, TokenType::_MOVE,
+    TokenType::_SQUARE, TokenType::_MOVE,
+    TokenType::_BOARD,
 };
 
 un_set<TokenType> Parser::s_lineTokens = {
@@ -52,7 +53,7 @@ Token& Parser::Consume(TokenType type, bool jumpLineToken)
     }
 
     if (t.type != type)
-        throw std::runtime_error("unexpected token type got : " + std::to_string((int)t.type) + "expected : " + std::to_string((int)type));
+        throw std::runtime_error("unexpected token type got : " + std::to_string((int)t.type) + " expected : " + std::to_string((int)type) + " line : " + std::to_string(t.line) + " column : " + std::to_string(t.column));
     m_tokenIndex++;
     return t;
 }

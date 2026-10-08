@@ -18,6 +18,7 @@
 #include <cctype>
 #include <source_location>
 #include <filesystem>
+#include <limits>
 
 /// Using
 using str_view      = std::string_view;

@@ -12,7 +12,6 @@ void Compiler::Compile(ProgramExpression *program)
 {
     m_program = program;
     CompileProgram();
-    Emit(OpCode::_HALT);
     ResolveLabels();
 }
 
@@ -49,12 +48,39 @@ void Compiler::CompileProgram()
         // TODO :: make it a error later 
         return;
     }
+
+    size globalSlotCount = 0;
+    for (size_t i = 0; i < m_program->content.size(); i++)
+    {
+    Expression* expr = m_program->content[i];
+    if (expr->type != ExpressionType::_VARIABLE_DECLARATION)
+        continue;
+    VariableDeclarationExpression* varDec = ExpressionCast<ExpressionType::_VARIABLE_DECLARATION>(expr);
+    if (varDec->symbol == nullptr)
+        continue;
+    size slotEnd = static_cast<size>(varDec->symbol->m_slot + 1);
+    if (slotEnd > globalSlotCount)
+        globalSlotCount = slotEnd;
+    }
+    m_chunk.set_global_slot_count(globalSlotCount);
+
+    for (size_t i = 0; i < m_program->content.size(); i++)
+    {
+        Expression* expr = m_program->content[i];
+        if (expr->type != ExpressionType::_VARIABLE_DECLARATION)
+            continue;
+        CompileDeclaration(expr);
+    }
+
+    Emit(OpCode::_PUSH, 0);   
     Emit(OpCode::_CALL, static_cast<u8>(mainIndex), 0);
     Emit(OpCode::_HALT);
 
     for (size_t i = 0; i < m_program->content.size(); i++)
     {
         Expression* expr = m_program->content[i];
+        if (expr->type != ExpressionType::_FUNCTION_DECLARATION)
+            continue;
         CompileDeclaration(expr);
     }
 }
@@ -123,14 +149,14 @@ void Compiler::CompileDoWhile(DoWhileExpression *doWhile)
     BindLabel(labelStart, m_chunk.instruction_size());
     CompileBlock(doWhile->block);
     CompileExpression(doWhile->condition); 
-    EmitJump(OpCode::_JNZ, 0, static_cast<u8>(labelStart));       
+    EmitJump(OpCode::_JNZ, 0, labelStart);       
 }
 
 void Compiler::CompileIf(IfExpression *ifStmt)
 {
     size_t lEnd = NewLabel();
     CompileExpression(ifStmt->condition); 
-    EmitJump(OpCode::_JZ, 0, static_cast<u8>(lEnd));       
+    EmitJump(OpCode::_JZ, 0, lEnd);       
     CompileBlock(ifStmt->block);
     BindLabel(lEnd, m_chunk.instruction_size());
 }
@@ -146,14 +172,27 @@ void Compiler::CompileFunctionDeclaration(FunctionDeclarationExpression *functio
 
 void Compiler::CompileFunctionCall(FunctionCallExpression *functionCall)
 {
-    for (size_t i = 0; i < functionCall->arguments.size(); i++)
+    FuncSymbol* functionSymbol = functionCall->symb;
+
+    if (!functionSymbol->isBuiltin)
     {
-        Expression* expr = functionCall->arguments[i];
-        CompileExpression(expr);
-        Emit(OpCode::_PUSH, 0); 
+        Emit(OpCode::_PUSH, 0);  
     }
-    
-    Emit(OpCode::_CALL, static_cast<u8>(functionCall->symb->function_index), static_cast<u8>(functionCall->arguments.size()));
+
+    for (size_t argumentIndex = 0; argumentIndex < functionCall->arguments.size(); argumentIndex++)
+    {
+        Expression* argument = functionCall->arguments[argumentIndex];
+        CompileExpression(argument);
+        Emit(OpCode::_PUSH, 0);
+    }
+
+    if (functionSymbol->isBuiltin)
+    {
+        Emit(OpCode::_CALL_NATIVE, static_cast<u8>(functionSymbol->function_index), static_cast<u8>(functionCall->arguments.size()));
+        return;
+    }
+
+    Emit(OpCode::_CALL, static_cast<u8>(functionSymbol->function_index), static_cast<u8>(functionCall->arguments.size()));
 }
 
 void Compiler::CompileVariableDeclaration(VariableDeclarationExpression *variableDeclaration)
@@ -164,14 +203,22 @@ void Compiler::CompileVariableDeclaration(VariableDeclarationExpression *variabl
     CompileExpression(variableDeclaration->value);
 
     VarSymbol* var = SymbolCast<SymbolType::_VAR>(variableDeclaration->symbol);
-    Emit(OpCode::_STORE, static_cast<u8>(var->m_slot), 0);
+    
+    if (var->isGlobal)
+        Emit(OpCode::_STOREG, static_cast<u8>(var->m_slot), 0);
+    else
+        Emit(OpCode::_STORE, static_cast<u8>(var->m_slot), 0);
 }
 
 void Compiler::CompileVariableAssignment(VariableAssignmentExpression *variableAssignment)
 {
     CompileExpression(variableAssignment->value);
     VarSymbol* var = SymbolCast<SymbolType::_VAR>(variableAssignment->symbol);
-    Emit(OpCode::_STORE, static_cast<u8>(var->m_slot), 0);
+    
+    if (var->isGlobal)
+        Emit(OpCode::_STOREG, static_cast<u8>(var->m_slot), 0);
+    else
+        Emit(OpCode::_STORE, static_cast<u8>(var->m_slot), 0);
 }
 
 void Compiler::CompileIdentifier(IdentifierExpression *identifier)
@@ -179,7 +226,13 @@ void Compiler::CompileIdentifier(IdentifierExpression *identifier)
     if (identifier->symbol == nullptr)
         return;
     VarSymbol* var = SymbolCast<SymbolType::_VAR>(identifier->symbol);
-    Emit(OpCode::_LOAD, 0, static_cast<u8>(var->m_slot)); 
+    if (var == nullptr)
+        return;
+
+    if (var->isGlobal)
+        Emit(OpCode::_LOADG, 0, static_cast<u8>(var->m_slot));
+    else
+        Emit(OpCode::_LOAD, 0, static_cast<u8>(var->m_slot));
 }
 
 void Compiler::CompileLiteral(LiteralExpression *literal)
@@ -199,9 +252,25 @@ void Compiler::CompileLiteral(LiteralExpression *literal)
         break;
 
     case TokenType::_VALUE:
-        c.type = ConstantType::_U64;
-        c.data.as_u64 = std::stoull(std::string(literal->token.view));
+    {
+        u64 value = std::stoull(std::string(literal->token.view));
+        if (value <= static_cast<u64>(std::numeric_limits<i32>::max()))
+        {
+            c.type = ConstantType::_I32;
+            c.data.as_i32 = static_cast<i32>(value);
+        }
+        else if (value <= static_cast<u64>(std::numeric_limits<i64>::max()))
+        {
+            c.type = ConstantType::_I64;
+            c.data.as_i64 = static_cast<i64>(value);
+        }
+        else
+        {
+            c.type = ConstantType::_U64;
+            c.data.as_u64 = value;
+        }
         break;
+    }
 
     case TokenType::_STRING_LITTERAL:
         c.type = ConstantType::_STRING;
@@ -276,7 +345,7 @@ void Compiler::ResolveLabels()
         }
         Instruction& instr = m_chunk.read_instruction(pj.instrIndex);
 
-        instr.regB = static_cast<u8>(targetPc);
+        instr.regB = (targetPc);
     }
 }
 
@@ -303,8 +372,6 @@ int Compiler::GetConstIndex(ConstantContainer& c)
             case ConstantType::_U64:      equal = (existing.data.as_u64 == c.data.as_u64); break;
             case ConstantType::_STRING:   equal = (existing.data.as_str && c.data.as_str && *existing.data.as_str == *c.data.as_str); break;
             case ConstantType::_BITBOARD: equal = (existing.data.as_bitboard == c.data.as_bitboard); break;
-            case ConstantType::_PIECE:    equal = (existing.data.as_piece == c.data.as_piece); break;
-            case ConstantType::_POSITION: equal = (existing.data.as_position == c.data.as_position); break;
             case ConstantType::_MOVE:     equal = (existing.data.as_move == c.data.as_move); break;
             default: break;
         }

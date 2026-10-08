@@ -8,7 +8,7 @@ template <ConstantType T> struct ConstantTrait;
 #define REGISTER_TYPE(ConstType, CppType, MemberName)           \
 template<> struct ConstantTrait<ConstType>                      \
 {                                                               \
-    using cpp = CppType;                                       \
+    using cpp = CppType;                                        \
                                                                 \
     static CppType get(const ConstantContainer& rContainer)     \
     {                                                           \
@@ -17,7 +17,7 @@ template<> struct ConstantTrait<ConstType>                      \
                                                                 \
     static ConstantContainer make(CppType val)                  \
     {                                                           \
-        ConstantContainer container;                            \
+        ConstantContainer container {};                         \
         container.type = ConstType;                             \
         container.data.MemberName = val;                        \
         return container;                                       \
@@ -41,8 +41,9 @@ REGISTER_TYPE(ConstantType::_STRING, str*, as_str)
 
 REGISTER_TYPE(ConstantType::_BITBOARD, Bitboard, as_bitboard)
 REGISTER_TYPE(ConstantType::_PIECE, Piece, as_piece)
-REGISTER_TYPE(ConstantType::_POSITION, Position, as_position)
+REGISTER_TYPE(ConstantType::_SQUARE, Square, as_square)
 REGISTER_TYPE(ConstantType::_MOVE, Move, as_move)
+
 /////////////////////////////////////////////////////////////////
 
 
@@ -72,6 +73,6 @@ TO_ENUM(ConstantType::_STRING, str*)
 
 TO_ENUM(ConstantType::_BITBOARD, Bitboard)
 TO_ENUM(ConstantType::_PIECE, Piece)
-TO_ENUM(ConstantType::_POSITION, Position)
+TO_ENUM(ConstantType::_SQUARE, Square)
 TO_ENUM(ConstantType::_MOVE, Move)
 /////////////////////////////////////////////////////////////////

@@ -3,8 +3,12 @@
 #include "Chunk.h"
 #include "VM_Operation.h"
 #include "VM_Table.h"
+#include "Board.h"
+
+using NativeFn = void(*)(class VM&, const ConstantContainer* arguments, u8 argc);
 
 constexpr size TABLE_COUNT = 14;
+
 inline static constexpr array<array<OperationPtr, TABLE_COUNT>, TABLE_COUNT> ADD_TABLE = CreateAddTable(
     std::make_index_sequence<TABLE_COUNT>{},
     std::make_index_sequence<TABLE_COUNT>{}
@@ -81,13 +85,9 @@ inline static constexpr array<array<OperationPtr, TABLE_COUNT>, TABLE_COUNT> CMP
     std::make_index_sequence<TABLE_COUNT>{}
 );
 
-inline static constexpr array<NoReturnOperationPtrSolo, TABLE_COUNT> PRINT_TABLE = CreatePrintTable(
-    std::make_index_sequence<TABLE_COUNT>{}
-);
-
 constexpr int registerAmount = 256;
-constexpr size framesAllocationSize = 64;
-constexpr size stackAllocationSize = 1024;
+constexpr size framesAllocationSize = 1024;
+constexpr size stackAllocationSize = 1024 * 1024;
 
 
 class VM
@@ -97,6 +97,7 @@ private:
     {
         size beginIndex;
         size frameSize;
+        vector<Move> moveList;
     };
 
 private:
@@ -111,6 +112,9 @@ private:
 
 	Chunk* m_pChunk;
 
+    Board m_Board;
+    vector<BoardState> m_BoardStates;
+
 public:
     VM();
 
@@ -118,6 +122,13 @@ public:
 
 	void Run();
 
+    Board& GetBoard() { return m_Board; }
+    vector<BoardState>& GetBoardStates() { return m_BoardStates; }
+    ConstantContainer& Register(size index) { return m_Registers[index]; }
+    StackFrame& CurrentFrame() { return m_Frames[m_FramesIndex]; }
+    vector<Move>& GetCurrentMoveList() { return m_Frames[m_FramesIndex].moveList; }
+
 private:
+    void InvokeNative(u8 nativeIndex, u8 argumentCount);
 	Instruction& Read_Instruction();
 };

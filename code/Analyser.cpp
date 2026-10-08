@@ -2,6 +2,7 @@
 #include "ExpressionTrait.h"
 #include "Scope.h"
 #include "SymbolTrait.h"
+#include "Builtins.h"
 
 Analyser::Analyser(ProgramExpression *program) : m_program(program)
 {
@@ -69,6 +70,7 @@ void Analyser::CollectGlobals()
             VariableDeclarationExpression* varExpr = ExpressionCast<ExpressionType::_VARIABLE_DECLARATION>(expr);
             VarSymbol* varSymbol = new VarSymbol(varExpr->varType->token.type);
             varSymbol->m_slot = m_nextSlot++;
+            varSymbol->isGlobal = true;
             if (m_scopes.back()->Declare(varExpr->name->token.view, varSymbol) == nullptr)
             {
                 delete varSymbol;
@@ -125,7 +127,23 @@ void Analyser::AnalyseBodies()
 
 void Analyser::AddBuiltin()
 {
-    //TODO
+    const std::vector<BuiltinDesc>& builtins = GetBuiltins();
+    for (size_t builtinIndex = 0; builtinIndex < builtins.size(); builtinIndex++)
+    {
+        const BuiltinDesc& desc = builtins[builtinIndex];
+        FuncSymbol* funcSymbol = new FuncSymbol();
+        funcSymbol->returnType = desc.hasReturn ? desc.returnType : TokenType::_DEFAULT;
+        funcSymbol->paramsType = desc.paramTypes;
+        funcSymbol->function_index = builtinIndex;
+        funcSymbol->isBuiltin = true;
+        funcSymbol->hasReturn = desc.hasReturn;
+
+        if (m_scopes.back()->Declare(desc.name, funcSymbol) == nullptr)
+        {
+            delete funcSymbol;
+            m_errors.push_back({ std::string("Builtin name collision: ") + desc.name, nullptr });
+        }
+    }
 }
 
 TokenType Analyser::AnalyseExpression(Expression *expr)
@@ -183,13 +201,12 @@ void Analyser::ReturnAnalyse(ReturnExpression *ret)
         return;
 
     TokenType retType = AnalyseExpression(ret->value);
-    std::pair<bool,TokenType> typeInfer = TypeInference(m_currentFunc->returnType->token.type, retType);
-    if (typeInfer.first == false)
+    if (!IsAssignable(retType, m_currentFunc->returnType->token.type))
     {
         m_errors.push_back({"return statement and function return type don't match on " + std::string(m_currentFunc->functionName->token.view), ret});
         ret->hasError = true;
     }
-    
+        
 }
 
 void Analyser::DoWhileAnalyse(DoWhileExpression *doWhile)
@@ -234,6 +251,11 @@ void Analyser::FunctionAnalyse(FunctionDeclarationExpression *func)
         fnSmb->paramsType.push_back(paramType);
     }
 
+    if (func->returnType != nullptr)
+    {
+        fnSmb->returnType = func->returnType->token.type;
+    }
+
     for (size_t i = 0; i < func->content->content.size(); i++)
     {
         Expression* expr = func->content->content[i];
@@ -241,11 +263,6 @@ void Analyser::FunctionAnalyse(FunctionDeclarationExpression *func)
     }
     
     fnSmb->slot_count = m_nextSlot;
-    if (func->returnType != nullptr)
-    {
-        fnSmb->returnType = func->returnType->token.type;
-    }
-
     func->symb = fnSmb;
 
     PopScope(true);
@@ -295,7 +312,11 @@ TokenType Analyser::FunctionCallAnalyse(FunctionCallExpression *call)
         Expression* expr = call->arguments[i];
         TokenType argType = AnalyseExpression(expr);
         TokenType paramType = fnSmb->paramsType[i];
-        if (argType != paramType)
+
+        if (paramType == TokenType::_ANY)
+            continue; 
+
+        if (!IsAssignable(argType, paramType))
         {
             m_errors.push_back({"function call arguments does not match type of " + std::string(fnSmb->m_name) + " parameters", call});
             call->hasError = true;
@@ -337,23 +358,12 @@ void Analyser::VarDeclarationAnalyse(VariableDeclarationExpression *varDec)
     if (varDec->value != nullptr)
     {
         TokenType valueType = AnalyseExpression(varDec->value);
-        static un_set<TokenType> valueTypeSet = {
-            TokenType::_BOOL,
-            TokenType::_I8, TokenType::_I16, TokenType::_I32, TokenType::_I64,
-            TokenType::_U8, TokenType::_U16, TokenType::_U32, TokenType::_U64,
-        };
-        if 
-        (
-            !(valueType == varDec->varType->token.type ||
-            valueType == TokenType::_VALUE && valueTypeSet.count(varDec->varType->token.type) ||
-            varDec->varType->token.type == TokenType::_STRING_IDENTIFIER && (valueType == TokenType::_STRING_IDENTIFIER || valueType == TokenType::_STRING_LITTERAL))
-        )
+        if (!IsAssignable(valueType, varDec->varType->token.type))
         {
-                m_errors.push_back({"could not assign value to " + std::string(varSmb->m_name) + " because of type difference " + std::to_string((int)valueType) + " and " + std::to_string((int)varSmb->varType), varDec});
-                varDec->hasError = true;
-                return;
+            m_errors.push_back({"could not assign value to " + std::string(varSmb->m_name) + " because of type difference " + std::to_string((int)valueType) + " and " + std::to_string((int)varSmb->varType), varDec});
+            varDec->hasError = true;
+            return;
         }
-        
     }
 
     varDec->symbol = varSmb;
@@ -378,7 +388,7 @@ void Analyser::VarAssignmentAnalyse(VariableAssignmentExpression *varAssign)
     }
 
     TokenType varType = AnalyseExpression(varAssign->value);
-    if (varType != varSmb->varType)
+    if (!IsAssignable(varType, varSmb->varType))
     {
         m_errors.push_back({"could not assign value to " + std::string(varSmb->m_name) + " because of type difference " + std::to_string((int)varType) + " and " + std::to_string((int)varSmb->varType), varAssign});
         varAssign->hasError = true;
@@ -542,9 +552,14 @@ std::pair<bool,TokenType> Analyser::TypeInference(TokenType typeA, TokenType typ
                 {TokenType::_PIECE, TokenType::_PIECE},
             }
         },
-        {TokenType::_POSITION,
+        {TokenType::_SQUARE,
             {
-                {TokenType::_POSITION, TokenType::_POSITION},
+                {TokenType::_SQUARE, TokenType::_SQUARE},
+            }
+        },
+        {TokenType::_BOARD,
+            {
+                 {TokenType::_BOARD, TokenType::_BOARD}
             }
         },
         {TokenType::_MOVE,
@@ -605,4 +620,30 @@ void Analyser::PopScope(bool popFunc)
         m_currentFunc = m_previousFunc.back();
         m_previousFunc.pop_back();
     }
+}
+
+bool Analyser::IsAssignable(TokenType fromType, TokenType toType)
+{
+    if (fromType == toType)
+    {
+        return true;
+    }
+
+    static un_set<TokenType> numericTypes = {
+        TokenType::_BOOL,
+        TokenType::_I8, TokenType::_I16, TokenType::_I32, TokenType::_I64,
+        TokenType::_U8, TokenType::_U16, TokenType::_U32, TokenType::_U64,
+    };
+
+    if (fromType == TokenType::_VALUE && numericTypes.count(toType))
+    {
+        return true;
+    }
+
+    if (fromType == TokenType::_STRING_LITTERAL && toType == TokenType::_STRING_IDENTIFIER)
+    {
+        return true;
+    }
+
+    return false;
 }

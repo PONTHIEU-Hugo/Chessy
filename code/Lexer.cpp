@@ -1,24 +1,25 @@
 #include "Lexer.h"
 
 un_map<str, TokenType> Lexer::s_Identifier{
-    std::pair<str, TokenType>("bool", TokenType::_BOOL),
+    std::pair<str, TokenType>("Bool", TokenType::_BOOL),
 
-    std::pair<str, TokenType>("i8", TokenType::_I8),
-    std::pair<str, TokenType>("i16", TokenType::_I16),
-    std::pair<str, TokenType>("i32", TokenType::_I32),
-    std::pair<str, TokenType>("i64", TokenType::_I64),
+    std::pair<str, TokenType>("I8", TokenType::_I8),
+    std::pair<str, TokenType>("I16", TokenType::_I16),
+    std::pair<str, TokenType>("I32", TokenType::_I32),
+    std::pair<str, TokenType>("I64", TokenType::_I64),
     
-    std::pair<str, TokenType>("u8", TokenType::_U8),
-    std::pair<str, TokenType>("u16", TokenType::_U16),
-    std::pair<str, TokenType>("u32", TokenType::_U32),
-    std::pair<str, TokenType>("u64", TokenType::_U64),
+    std::pair<str, TokenType>("U8", TokenType::_U8),
+    std::pair<str, TokenType>("U16", TokenType::_U16),
+    std::pair<str, TokenType>("U32", TokenType::_U32),
+    std::pair<str, TokenType>("U64", TokenType::_U64),
     
-    std::pair<str, TokenType>("string", TokenType::_STRING_IDENTIFIER),
+    std::pair<str, TokenType>("String", TokenType::_STRING_IDENTIFIER),
     
-    std::pair<str, TokenType>("bitboard", TokenType::_BITBOARD),
-    std::pair<str, TokenType>("piece", TokenType::_PIECE),
-    std::pair<str, TokenType>("position", TokenType::_POSITION),
-    std::pair<str, TokenType>("move", TokenType::_MOVE),
+    std::pair<str, TokenType>("Bitboard", TokenType::_BITBOARD),
+    std::pair<str, TokenType>("Piece", TokenType::_PIECE),
+    std::pair<str, TokenType>("Square", TokenType::_SQUARE),
+    std::pair<str, TokenType>("Board", TokenType::_BOARD),
+    std::pair<str, TokenType>("Move", TokenType::_MOVE),
 };
 
 un_map<str, TokenType> Lexer::s_Keyword{
