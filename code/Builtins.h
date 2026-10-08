@@ -43,6 +43,7 @@ inline const std::vector<BuiltinDesc>& GetBuiltins()
         { "KingSquare",       1, true,  TokenType::_SQUARE,  { TokenType::_I32 } },
 
         { "SortCapturesFirst", 0, false, TokenType::_DEFAULT, { } },
+        { "SortMovesMvvLva", 0, false, TokenType::_DEFAULT, { } },
 
         { "PrintBoard",        0, false, TokenType::_DEFAULT, { } },
         { "ReadInt",           0, true,  TokenType::_I32,     { } },
@@ -69,6 +70,8 @@ inline const std::vector<BuiltinDesc>& GetBuiltins()
         { "PieceBlackRook",   0, true, TokenType::_PIECE, { } },
         { "PieceBlackQueen",  0, true, TokenType::_PIECE, { } },
         { "PieceBlackKing",   0, true, TokenType::_PIECE, { } },
+
+        { "GenerateCaptures", 0, false, TokenType::_DEFAULT, { } },
     };
     return builtins;
 }

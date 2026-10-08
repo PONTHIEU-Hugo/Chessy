@@ -28,6 +28,9 @@ static void PushKnightMoves(const Board& board, vector<Move>& moveList, Color co
 static void PushSlidingMoves(const Board& board, vector<Move>& moveList, Color color, PieceType pieceType);
 static void PushKingMoves(const Board& board, vector<Move>& moveList, Color color);
 static void PushCastlingMoves(const Board& board, vector<Move>& moveList, Color color);
+static int PieceValue(Piece p);
+static int MoveScore(const Board& board, const Move& m);
+static void GenerateCapturesInternal(VM& vm);
 
 void InvokeNativeImpl(u8 nativeIndex, const char* name, VM& vm, const ConstantContainer* arguments, u8 argumentCount);
 
@@ -409,24 +412,10 @@ static void UnmakeMoveInternal(VM& vm)
 void InvokeNativeImpl(u8 nativeIndex, const char* name, VM& vm, const ConstantContainer* arguments, u8 argumentCount)
 {
     InitializeTables();
-    std::string_view nameView(name);
 
-    if (nameView == "PieceWhitePawn")   { vm.Register(0) = ConstantTrait<ConstantType::_PIECE>::make(Piece::WhitePawn);   return; }
-    if (nameView == "PieceWhiteKnight") { vm.Register(0) = ConstantTrait<ConstantType::_PIECE>::make(Piece::WhiteKnight); return; }
-    if (nameView == "PieceWhiteBishop") { vm.Register(0) = ConstantTrait<ConstantType::_PIECE>::make(Piece::WhiteBishop); return; }
-    if (nameView == "PieceWhiteRook")   { vm.Register(0) = ConstantTrait<ConstantType::_PIECE>::make(Piece::WhiteRook);   return; }
-    if (nameView == "PieceWhiteQueen")  { vm.Register(0) = ConstantTrait<ConstantType::_PIECE>::make(Piece::WhiteQueen);  return; }
-    if (nameView == "PieceWhiteKing")   { vm.Register(0) = ConstantTrait<ConstantType::_PIECE>::make(Piece::WhiteKing);   return; }
-    if (nameView == "PieceBlackPawn")   { vm.Register(0) = ConstantTrait<ConstantType::_PIECE>::make(Piece::BlackPawn);   return; }
-    if (nameView == "PieceBlackKnight") { vm.Register(0) = ConstantTrait<ConstantType::_PIECE>::make(Piece::BlackKnight); return; }
-    if (nameView == "PieceBlackBishop") { vm.Register(0) = ConstantTrait<ConstantType::_PIECE>::make(Piece::BlackBishop); return; }
-    if (nameView == "PieceBlackRook")   { vm.Register(0) = ConstantTrait<ConstantType::_PIECE>::make(Piece::BlackRook);   return; }
-    if (nameView == "PieceBlackQueen")  { vm.Register(0) = ConstantTrait<ConstantType::_PIECE>::make(Piece::BlackQueen);  return; }
-    if (nameView == "PieceBlackKing")   { vm.Register(0) = ConstantTrait<ConstantType::_PIECE>::make(Piece::BlackKing);   return; }
-    if (nameView == "White")            { vm.Register(0) = ConstantTrait<ConstantType::_I32>::make(0); return; }
-    if (nameView == "Black")            { vm.Register(0) = ConstantTrait<ConstantType::_I32>::make(1); return; }
-
-    if (nameView == "Print")
+    switch (nativeIndex)
+    {
+    case 0:  // Print
     {
         const ConstantContainer& value = arguments[0];
         switch (value.type)
@@ -460,36 +449,129 @@ void InvokeNativeImpl(u8 nativeIndex, const char* name, VM& vm, const ConstantCo
         }
         return;
     }
-    if (nameView == "NowMs") { auto now = std::chrono::steady_clock::now(); vm.Register(0) = ConstantTrait<ConstantType::_I64>::make(std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count()); return; }
-
-    if (nameView == "PopCount") { vm.Register(0) = ConstantTrait<ConstantType::_I32>::make(static_cast<i32>(PopCount(arguments[0].data.as_bitboard.board))); return; }
-    if (nameView == "Lsb") { u64 bitboard = arguments[0].data.as_bitboard.board; vm.Register(0) = ConstantTrait<ConstantType::_I32>::make(bitboard ? static_cast<i32>(CountTrailingZeros(bitboard)) : -1); return; }
-    if (nameView == "Bit") { vm.Register(0) = ConstantTrait<ConstantType::_BITBOARD>::make(Bitboard{ 1ULL << static_cast<u8>(arguments[0].data.as_i32) }); return; }
-    if (nameView == "BitTest") { u64 mask = 1ULL << static_cast<u8>(arguments[1].data.as_i32); vm.Register(0) = ConstantTrait<ConstantType::_BOOL>::make((arguments[0].data.as_bitboard.board & mask) != 0); return; }
-
-    if (nameView == "SquareMake") { u8 index = static_cast<u8>(arguments[1].data.as_i32 * 8 + arguments[0].data.as_i32); vm.Register(0) = ConstantTrait<ConstantType::_SQUARE>::make(Square{ index }); return; }
-    if (nameView == "SquareFile") { vm.Register(0) = ConstantTrait<ConstantType::_I32>::make(arguments[0].data.as_square.index & 7); return; }
-    if (nameView == "SquareRank") { vm.Register(0) = ConstantTrait<ConstantType::_I32>::make(arguments[0].data.as_square.index >> 3); return; }
-
-    if (nameView == "KnightAttacks") { vm.Register(0) = ConstantTrait<ConstantType::_BITBOARD>::make(Bitboard{ g_KnightAttacks[arguments[0].data.as_square.index] }); return; }
-    if (nameView == "KingAttacks") { vm.Register(0) = ConstantTrait<ConstantType::_BITBOARD>::make(Bitboard{ g_KingAttacks[arguments[0].data.as_square.index] }); return; }
-    if (nameView == "PawnAttacks") { vm.Register(0) = ConstantTrait<ConstantType::_BITBOARD>::make(Bitboard{ g_PawnAttacks[static_cast<u8>(arguments[1].data.as_i32)][arguments[0].data.as_square.index] }); return; }
-    if (nameView == "BishopAttacks") { vm.Register(0) = ConstantTrait<ConstantType::_BITBOARD>::make(Bitboard{ ComputeBishopAttacks(arguments[0].data.as_square.index, arguments[1].data.as_bitboard.board) }); return; }
-    if (nameView == "RookAttacks") { vm.Register(0) = ConstantTrait<ConstantType::_BITBOARD>::make(Bitboard{ ComputeRookAttacks(arguments[0].data.as_square.index, arguments[1].data.as_bitboard.board) }); return; }
-    if (nameView == "QueenAttacks") { u64 attacks = ComputeBishopAttacks(arguments[0].data.as_square.index, arguments[1].data.as_bitboard.board) | ComputeRookAttacks(arguments[0].data.as_square.index, arguments[1].data.as_bitboard.board); vm.Register(0) = ConstantTrait<ConstantType::_BITBOARD>::make(Bitboard{ attacks }); return; }
-
-    if (nameView == "SortCapturesFirst")
+    case 1:  // NowMs
+    {
+        auto now = std::chrono::steady_clock::now();
+        vm.Register(0) = ConstantTrait<ConstantType::_I64>::make(
+            std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count());
+        return;
+    }
+    case 2:  // PopCount
+        vm.Register(0) = ConstantTrait<ConstantType::_I32>::make(static_cast<i32>(PopCount(arguments[0].data.as_bitboard.board)));
+        return;
+    case 3:  // Lsb
+    {
+        u64 bb = arguments[0].data.as_bitboard.board;
+        vm.Register(0) = ConstantTrait<ConstantType::_I32>::make(bb ? static_cast<i32>(CountTrailingZeros(bb)) : -1);
+        return;
+    }
+    case 4:  // Bit
+        vm.Register(0) = ConstantTrait<ConstantType::_BITBOARD>::make(Bitboard{ 1ULL << static_cast<u8>(arguments[0].data.as_i32) });
+        return;
+    case 5:  // BitTest
+    {
+        u64 mask = 1ULL << static_cast<u8>(arguments[1].data.as_i32);
+        vm.Register(0) = ConstantTrait<ConstantType::_BOOL>::make((arguments[0].data.as_bitboard.board & mask) != 0);
+        return;
+    }
+    case 6:  // SquareMake
+    {
+        u8 index = static_cast<u8>(arguments[1].data.as_i32 * 8 + arguments[0].data.as_i32);
+        vm.Register(0) = ConstantTrait<ConstantType::_SQUARE>::make(Square{ index });
+        return;
+    }
+    case 7:  // SquareFile
+        vm.Register(0) = ConstantTrait<ConstantType::_I32>::make(arguments[0].data.as_square.index & 7);
+        return;
+    case 8:  // SquareRank
+        vm.Register(0) = ConstantTrait<ConstantType::_I32>::make(arguments[0].data.as_square.index >> 3);
+        return;
+    case 9:  // KnightAttacks
+        vm.Register(0) = ConstantTrait<ConstantType::_BITBOARD>::make(Bitboard{ g_KnightAttacks[arguments[0].data.as_square.index] });
+        return;
+    case 10: // KingAttacks
+        vm.Register(0) = ConstantTrait<ConstantType::_BITBOARD>::make(Bitboard{ g_KingAttacks[arguments[0].data.as_square.index] });
+        return;
+    case 11: // PawnAttacks
+        vm.Register(0) = ConstantTrait<ConstantType::_BITBOARD>::make(Bitboard{ g_PawnAttacks[static_cast<u8>(arguments[1].data.as_i32)][arguments[0].data.as_square.index] });
+        return;
+    case 12: // BishopAttacks
+        vm.Register(0) = ConstantTrait<ConstantType::_BITBOARD>::make(Bitboard{ ComputeBishopAttacks(arguments[0].data.as_square.index, arguments[1].data.as_bitboard.board) });
+        return;
+    case 13: // RookAttacks
+        vm.Register(0) = ConstantTrait<ConstantType::_BITBOARD>::make(Bitboard{ ComputeRookAttacks(arguments[0].data.as_square.index, arguments[1].data.as_bitboard.board) });
+        return;
+    case 14: // QueenAttacks
+    {
+        u64 attacks = ComputeBishopAttacks(arguments[0].data.as_square.index, arguments[1].data.as_bitboard.board)
+                    | ComputeRookAttacks(arguments[0].data.as_square.index, arguments[1].data.as_bitboard.board);
+        vm.Register(0) = ConstantTrait<ConstantType::_BITBOARD>::make(Bitboard{ attacks });
+        return;
+    }
+    case 15: // NewBoard
+    {
+        Board& board = vm.GetBoard();
+        std::memset(&board, 0, sizeof(Board));
+        board.pieces[static_cast<u8>(Piece::WhitePawn)]   = 0x000000000000FF00ULL;
+        board.pieces[static_cast<u8>(Piece::WhiteKnight)] = 0x0000000000000042ULL;
+        board.pieces[static_cast<u8>(Piece::WhiteBishop)] = 0x0000000000000024ULL;
+        board.pieces[static_cast<u8>(Piece::WhiteRook)]   = 0x0000000000000081ULL;
+        board.pieces[static_cast<u8>(Piece::WhiteQueen)]  = 0x0000000000000008ULL;
+        board.pieces[static_cast<u8>(Piece::WhiteKing)]   = 0x0000000000000010ULL;
+        board.pieces[static_cast<u8>(Piece::BlackPawn)]   = 0x00FF000000000000ULL;
+        board.pieces[static_cast<u8>(Piece::BlackKnight)] = 0x4200000000000000ULL;
+        board.pieces[static_cast<u8>(Piece::BlackBishop)] = 0x2400000000000000ULL;
+        board.pieces[static_cast<u8>(Piece::BlackRook)]   = 0x8100000000000000ULL;
+        board.pieces[static_cast<u8>(Piece::BlackQueen)]  = 0x0800000000000000ULL;
+        board.pieces[static_cast<u8>(Piece::BlackKing)]   = 0x1000000000000000ULL;
+        board.occupancy[0] = 0x000000000000FFFFULL;
+        board.occupancy[1] = 0xFFFF000000000000ULL;
+        board.allOccupancy = 0xFFFF00000000FFFFULL;
+        board.sideToMove = Color::White;
+        board.castlingRights = 0x0F;
+        board.enPassantSquare = NoSquare;
+        board.halfmoveClock = 0;
+        board.fullmoveNumber = 1;
+        return;
+    }
+    case 16: // SideToMove
+        vm.Register(0) = ConstantTrait<ConstantType::_I32>::make(static_cast<i32>(vm.GetBoard().sideToMove));
+        return;
+    case 17: // PieceAt
+        vm.Register(0) = ConstantTrait<ConstantType::_PIECE>::make(PieceOnSquare(vm.GetBoard(), arguments[0].data.as_square.index));
+        return;
+    case 18: // Pieces
+        vm.Register(0) = ConstantTrait<ConstantType::_BITBOARD>::make(Bitboard{ vm.GetBoard().pieces[static_cast<u8>(arguments[0].data.as_piece)] });
+        return;
+    case 19: // Occupancy
+        vm.Register(0) = ConstantTrait<ConstantType::_BITBOARD>::make(Bitboard{ vm.GetBoard().occupancy[static_cast<u8>(arguments[0].data.as_i32)] });
+        return;
+    case 20: // KingSquare
+    {
+        u64 king = vm.GetBoard().pieces[static_cast<u8>(MakePiece(static_cast<Color>(arguments[0].data.as_i32), PieceType::King))];
+        vm.Register(0) = ConstantTrait<ConstantType::_SQUARE>::make(Square{ king ? static_cast<u8>(CountTrailingZeros(king)) : NoSquare });
+        return;
+    }
+        case 21: // SortCapturesFirst
     {
         vector<Move>& moveList = vm.GetCurrentMoveList();
         std::partition(moveList.begin(), moveList.end(),
             [](const Move& m) {
-                return (m.flags & MoveFlagCapture) != 0
-                    || (m.flags & MoveFlagPromotion) != 0;
+                return (m.flags & MoveFlagCapture) != 0 || (m.flags & MoveFlagPromotion) != 0;
             });
         return;
     }
-
-    if (nameView == "PrintBoard")
+    case 22: // SortMovesMvvLva
+    {
+        Board& board = vm.GetBoard();
+        vector<Move>& moveList = vm.GetCurrentMoveList();
+        std::stable_sort(moveList.begin(), moveList.end(),
+            [&board](const Move& a, const Move& b) {
+                return MoveScore(board, a) > MoveScore(board, b);
+            });
+        return;
+    }
+    case 23: // PrintBoard
     {
         Board& board = vm.GetBoard();
         static const char pieceChars[12] = { 'P','N','B','R','Q','K','p','n','b','r','q','k' };
@@ -516,16 +598,14 @@ void InvokeNativeImpl(u8 nativeIndex, const char* name, VM& vm, const ConstantCo
         std::cout << "Side: " << (board.sideToMove == Color::White ? "White" : "Black") << std::endl;
         return;
     }
-
-    if (nameView == "ReadInt")
+    case 24: // ReadInt
     {
         i32 value = 0;
         std::cin >> value;
         vm.Register(0) = ConstantTrait<ConstantType::_I32>::make(value);
         return;
     }
-
-    if (nameView == "ReadMove")
+    case 25: // ReadMove
     {
         std::string input;
         std::cin >> input;
@@ -538,7 +618,6 @@ void InvokeNativeImpl(u8 nativeIndex, const char* name, VM& vm, const ConstantCo
             u8 toRank   = static_cast<u8>(input[3] - '1');
             m.from = static_cast<u8>(fromRank * 8 + fromFile);
             m.to   = static_cast<u8>(toRank * 8 + toFile);
-
             Board& board = vm.GetBoard();
             u64 toBit = 1ULL << m.to;
             if (board.occupancy[static_cast<u8>(OppositeColor(board.sideToMove))] & toBit)
@@ -547,56 +626,25 @@ void InvokeNativeImpl(u8 nativeIndex, const char* name, VM& vm, const ConstantCo
         vm.Register(0) = ConstantTrait<ConstantType::_MOVE>::make(m);
         return;
     }
-    if (nameView == "NullMove")
-    {
+    case 26: // NullMove
         vm.Register(0) = ConstantTrait<ConstantType::_MOVE>::make(Move{ 0, 0, 0 });
         return;
-    }
-
-    if (nameView == "NewBoard")
-    {
-        Board& board = vm.GetBoard();
-        std::memset(&board, 0, sizeof(Board));
-        board.pieces[static_cast<u8>(Piece::WhitePawn)]   = 0x000000000000FF00ULL;
-        board.pieces[static_cast<u8>(Piece::WhiteKnight)] = 0x0000000000000042ULL;
-        board.pieces[static_cast<u8>(Piece::WhiteBishop)] = 0x0000000000000024ULL;
-        board.pieces[static_cast<u8>(Piece::WhiteRook)]   = 0x0000000000000081ULL;
-        board.pieces[static_cast<u8>(Piece::WhiteQueen)]  = 0x0000000000000008ULL;
-        board.pieces[static_cast<u8>(Piece::WhiteKing)]   = 0x0000000000000010ULL;
-        board.pieces[static_cast<u8>(Piece::BlackPawn)]   = 0x00FF000000000000ULL;
-        board.pieces[static_cast<u8>(Piece::BlackKnight)] = 0x4200000000000000ULL;
-        board.pieces[static_cast<u8>(Piece::BlackBishop)] = 0x2400000000000000ULL;
-        board.pieces[static_cast<u8>(Piece::BlackRook)]   = 0x8100000000000000ULL;
-        board.pieces[static_cast<u8>(Piece::BlackQueen)]  = 0x0800000000000000ULL;
-        board.pieces[static_cast<u8>(Piece::BlackKing)]   = 0x1000000000000000ULL;
-        board.occupancy[0] = 0x000000000000FFFFULL;
-        board.occupancy[1] = 0xFFFF000000000000ULL;
-        board.allOccupancy = 0xFFFF00000000FFFFULL;
-        board.sideToMove = Color::White;
-        board.castlingRights = 0x0F;
-        board.enPassantSquare = NoSquare;
-        board.halfmoveClock = 0;
-        board.fullmoveNumber = 1;
+    case 27: // Generate
+        GenerateMovesInternal(vm);
         return;
-    }
-    if (nameView == "SideToMove") { vm.Register(0) = ConstantTrait<ConstantType::_I32>::make(static_cast<i32>(vm.GetBoard().sideToMove)); return; }
-    if (nameView == "PieceAt") { vm.Register(0) = ConstantTrait<ConstantType::_PIECE>::make(PieceOnSquare(vm.GetBoard(), arguments[0].data.as_square.index)); return; }
-    if (nameView == "Pieces") { vm.Register(0) = ConstantTrait<ConstantType::_BITBOARD>::make(Bitboard{ vm.GetBoard().pieces[static_cast<u8>(arguments[0].data.as_piece)] }); return; }
-    if (nameView == "Occupancy") { vm.Register(0) = ConstantTrait<ConstantType::_BITBOARD>::make(Bitboard{ vm.GetBoard().occupancy[static_cast<u8>(arguments[0].data.as_i32)] }); return; }
-    if (nameView == "KingSquare")
-    {
-        u64 king = vm.GetBoard().pieces[static_cast<u8>(MakePiece(static_cast<Color>(arguments[0].data.as_i32), PieceType::King))];
-        vm.Register(0) = ConstantTrait<ConstantType::_SQUARE>::make(Square{ king ? static_cast<u8>(CountTrailingZeros(king)) : NoSquare });
+    case 28: // MoveCount
+        vm.Register(0) = ConstantTrait<ConstantType::_I32>::make(static_cast<i32>(vm.GetCurrentMoveList().size()));
         return;
-    }
-
-    if (nameView == "Generate") { GenerateMovesInternal(vm); return; }
-    if (nameView == "MoveCount") { vm.Register(0) = ConstantTrait<ConstantType::_I32>::make(static_cast<i32>(vm.GetCurrentMoveList().size())); return; }
-    if (nameView == "MoveAt") { vm.Register(0) = ConstantTrait<ConstantType::_MOVE>::make(vm.GetCurrentMoveList()[arguments[0].data.as_i32]); return; }
-    if (nameView == "MakeMove") { MakeMoveInternal(vm, arguments[0].data.as_move); return; }
-    if (nameView == "UnmakeMove") { UnmakeMoveInternal(vm); return; }
-
-    if (nameView == "InCheck")
+    case 29: // MoveAt
+        vm.Register(0) = ConstantTrait<ConstantType::_MOVE>::make(vm.GetCurrentMoveList()[arguments[0].data.as_i32]);
+        return;
+    case 30: // MakeMove
+        MakeMoveInternal(vm, arguments[0].data.as_move);
+        return;
+    case 31: // UnmakeMove
+        UnmakeMoveInternal(vm);
+        return;
+    case 32: // InCheck
     {
         Color color = static_cast<Color>(arguments[0].data.as_i32);
         u64 king = vm.GetBoard().pieces[static_cast<u8>(MakePiece(color, PieceType::King))];
@@ -605,4 +653,76 @@ void InvokeNativeImpl(u8 nativeIndex, const char* name, VM& vm, const ConstantCo
         vm.Register(0) = ConstantTrait<ConstantType::_BOOL>::make(IsSquareAttacked(vm.GetBoard(), kingSquare, OppositeColor(color)));
         return;
     }
+    case 33: vm.Register(0) = ConstantTrait<ConstantType::_PIECE>::make(Piece::WhitePawn);   return;
+    case 34: vm.Register(0) = ConstantTrait<ConstantType::_PIECE>::make(Piece::WhiteKnight); return;
+    case 35: vm.Register(0) = ConstantTrait<ConstantType::_PIECE>::make(Piece::WhiteBishop); return;
+    case 36: vm.Register(0) = ConstantTrait<ConstantType::_PIECE>::make(Piece::WhiteRook);   return;
+    case 37: vm.Register(0) = ConstantTrait<ConstantType::_PIECE>::make(Piece::WhiteQueen);  return;
+    case 38: vm.Register(0) = ConstantTrait<ConstantType::_PIECE>::make(Piece::WhiteKing);   return;
+    case 39: vm.Register(0) = ConstantTrait<ConstantType::_PIECE>::make(Piece::BlackPawn);   return;
+    case 40: vm.Register(0) = ConstantTrait<ConstantType::_PIECE>::make(Piece::BlackKnight); return;
+    case 41: vm.Register(0) = ConstantTrait<ConstantType::_PIECE>::make(Piece::BlackBishop); return;
+    case 42: vm.Register(0) = ConstantTrait<ConstantType::_PIECE>::make(Piece::BlackRook);   return;
+    case 43: vm.Register(0) = ConstantTrait<ConstantType::_PIECE>::make(Piece::BlackQueen);  return;
+    case 44: vm.Register(0) = ConstantTrait<ConstantType::_PIECE>::make(Piece::BlackKing);   return;
+    case 45: // GenerateCaptures
+        GenerateCapturesInternal(vm);
+        return;
+
+    default:
+        std::cout << "Unknown builtin index: " << static_cast<int>(nativeIndex) << std::endl;
+        return;
+    }
+}
+
+static int PieceValue(Piece p)
+{
+    switch (TypeOfPiece(p))
+    {
+    case PieceType::Pawn:   return 100;
+    case PieceType::Knight: return 320;
+    case PieceType::Bishop: return 330;
+    case PieceType::Rook:   return 500;
+    case PieceType::Queen:  return 900;
+    case PieceType::King:   return 20000;
+    default:                return 0;
+    }
+}
+
+static int MoveScore(const Board& board, const Move& m)
+{
+    int score = 0;
+    if (m.flags & MoveFlagCapture)
+    {
+        int victim = PieceValue(PieceOnSquare(board, m.to));
+        int attacker = PieceValue(PieceOnSquare(board, m.from));
+        score = 1000000 + victim * 10 - attacker;
+    }
+    else if (m.flags & MoveFlagPromotion)
+    {
+        score = 900000;
+    }
+    return score;
+}
+
+static void GenerateCapturesInternal(VM& vm)
+{
+    Board& board = vm.GetBoard();
+    vector<Move>& moveList = vm.GetCurrentMoveList();
+    moveList.clear();
+    Color color = board.sideToMove;
+    
+    PushPawnMoves(board, moveList, color);
+    PushKnightMoves(board, moveList, color);
+    PushSlidingMoves(board, moveList, color, PieceType::Bishop);
+    PushSlidingMoves(board, moveList, color, PieceType::Rook);
+    PushSlidingMoves(board, moveList, color, PieceType::Queen);
+    PushKingMoves(board, moveList, color);
+    
+    moveList.erase(
+        std::remove_if(moveList.begin(), moveList.end(),
+            [](const Move& m) {
+                return !((m.flags & MoveFlagCapture) || (m.flags & MoveFlagPromotion));
+            }),
+        moveList.end());
 }

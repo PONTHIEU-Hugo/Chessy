@@ -16,16 +16,61 @@ func Evaluate() : I32 {
     return -score;
 }
 
+func Quiescence(I32 alpha, I32 beta, I32 qDepth) : I32 {
+    I32 standPat = Evaluate();
+
+    if (standPat >= beta) {
+        return beta;
+    }
+    if (standPat > alpha) {
+        alpha = standPat;
+    }
+    if (qDepth >= 4) {
+        return alpha;
+    }
+
+    GenerateCaptures();
+    SortMovesMvvLva();
+
+    I32 moveTotal = MoveCount();
+    if (moveTotal == 0) {
+        return alpha;
+    }
+
+    I32 moveIndex = 0;
+
+    do {
+        Move m = MoveAt(moveIndex);
+        MakeMove(m);
+        I32 score = -Quiescence(-beta, -alpha, qDepth + 1);
+        UnmakeMove();
+
+        if (score >= beta) {
+            return beta;
+        }
+        if (score > alpha) {
+            alpha = score;
+        }
+        moveIndex = moveIndex + 1;
+    } while (moveIndex < moveTotal);
+
+    return alpha;
+}
+
 func AlphaBeta(I32 depth, I32 alpha, I32 beta) : I32 {
     if (depth == 0) {
-        return Evaluate();
+        return Quiescence(alpha, beta, 0);
     }
 
     Generate();
-    SortCapturesFirst();
+    SortMovesMvvLva();
     I32 moveTotal = MoveCount();
+
     if (moveTotal == 0) {
-        return Evaluate();
+        if (InCheck(SideToMove())) {
+            return -100000;
+        }
+        return 0;
     }
 
     I32 bestScore = -1000000;
@@ -54,7 +99,7 @@ func AlphaBeta(I32 depth, I32 alpha, I32 beta) : I32 {
 
 func FindBestMove(I32 depth) : Move {
     Generate();
-    SortCapturesFirst();
+    SortMovesMvvLva();
     I32 moveTotal = MoveCount();
     if (moveTotal == 0) {
         return NullMove();
@@ -97,18 +142,21 @@ func Main() {
 
         if (choice == 0) {
             running = 0;
-        } 
+        }
         if (choice == 1) {
+            Print(1);
             Move best = FindBestMove(4);
             Print(best);
             MakeMove(best);
-        } 
+        }
         if (choice == 2) {
+            Print(2);
             Move best = FindBestMove(5);
             Print(best);
             MakeMove(best);
         }
         if (choice == 3) {
+            Print(3);
             Move m = ReadMove();
             Print(m);
             MakeMove(m);
