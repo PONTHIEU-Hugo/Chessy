@@ -72,6 +72,19 @@ inline const std::vector<BuiltinDesc>& GetBuiltins()
         { "PieceBlackKing",   0, true, TokenType::_PIECE, { } },
 
         { "GenerateCaptures", 0, false, TokenType::_DEFAULT, { } },
+
+        { "VectorI32x8Make",      8, true,  TokenType::_I32x8, { TokenType::_I32, TokenType::_I32, TokenType::_I32, TokenType::_I32, TokenType::_I32, TokenType::_I32, TokenType::_I32, TokenType::_I32 } },
+        { "VectorI64x4Make",      4, true,  TokenType::_I64x4, { TokenType::_I64, TokenType::_I64, TokenType::_I64, TokenType::_I64 } },
+        { "VectorI32x8Broadcast", 1, true,  TokenType::_I32x8, { TokenType::_I32 } },
+        { "VectorI64x4Broadcast", 1, true,  TokenType::_I64x4, { TokenType::_I64 } },
+
+        { "VectorBBx4Make",   4, true,  TokenType::_I64x4,     { TokenType::_BITBOARD, TokenType::_BITBOARD, TokenType::_BITBOARD, TokenType::_BITBOARD } },
+        { "VectorBBx4Get",    2, true,  TokenType::_BITBOARD,  { TokenType::_I64x4, TokenType::_I32 } },
+        { "VectorBBx4And",    2, true,  TokenType::_I64x4,     { TokenType::_I64x4, TokenType::_I64x4 } },
+        { "VectorBBx4Or",     2, true,  TokenType::_I64x4,     { TokenType::_I64x4, TokenType::_I64x4 } },
+        { "VectorBBx4Xor",    2, true,  TokenType::_I64x4,     { TokenType::_I64x4, TokenType::_I64x4 } },
+        { "PopCountBatch",    1, true,  TokenType::_I64x4,     { TokenType::_I64x4 } },
+        { "VectorI64x4GetI32", 2, true, TokenType::_I32, { TokenType::_I64x4, TokenType::_I32 } },
     };
     return builtins;
 }

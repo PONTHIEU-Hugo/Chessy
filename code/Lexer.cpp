@@ -12,6 +12,9 @@ un_map<str, TokenType> Lexer::s_Identifier{
     std::pair<str, TokenType>("U16", TokenType::_U16),
     std::pair<str, TokenType>("U32", TokenType::_U32),
     std::pair<str, TokenType>("U64", TokenType::_U64),
+
+    std::pair<str, TokenType>("I32x8", TokenType::_I32x8),
+    std::pair<str, TokenType>("I64x4", TokenType::_I64x4),
     
     std::pair<str, TokenType>("String", TokenType::_STRING_IDENTIFIER),
     

@@ -1,4 +1,5 @@
 #include "VM_Table.h"
+#include <immintrin.h>
 
 // Add operand
 template<size iSize, size... jSize>
@@ -324,4 +325,141 @@ constexpr array<array<OperationPtr, sizeof...(jSize)>, sizeof...(iSize)> CreateC
     return array<array<OperationPtr, sizeof...(jSize)>, sizeof...(iSize)>{
         CreateCmpGeLine<iSize>(js)...
     };
+}
+
+inline VectorI32x8 operator+(const VectorI32x8& a, const VectorI32x8& b) {
+    __m256i va = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(a.lanes));
+    __m256i vb = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(b.lanes));
+    __m256i vr = _mm256_add_epi32(va, vb);
+    VectorI32x8 r; _mm256_storeu_si256(reinterpret_cast<__m256i*>(r.lanes), vr); return r;
+}
+inline VectorI32x8 operator-(const VectorI32x8& a, const VectorI32x8& b) {
+    __m256i va = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(a.lanes));
+    __m256i vb = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(b.lanes));
+    __m256i vr = _mm256_sub_epi32(va, vb);
+    VectorI32x8 r; _mm256_storeu_si256(reinterpret_cast<__m256i*>(r.lanes), vr); return r;
+}
+inline VectorI32x8 operator*(const VectorI32x8& a, const VectorI32x8& b) {
+    __m256i va = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(a.lanes));
+    __m256i vb = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(b.lanes));
+    __m256i vr = _mm256_mullo_epi32(va, vb);
+    VectorI32x8 r; _mm256_storeu_si256(reinterpret_cast<__m256i*>(r.lanes), vr); return r;
+}
+inline VectorI32x8 operator&(const VectorI32x8& a, const VectorI32x8& b) {
+    __m256i va = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(a.lanes));
+    __m256i vb = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(b.lanes));
+    __m256i vr = _mm256_and_si256(va, vb);
+    VectorI32x8 r; _mm256_storeu_si256(reinterpret_cast<__m256i*>(r.lanes), vr); return r;
+}
+inline VectorI32x8 operator|(const VectorI32x8& a, const VectorI32x8& b) {
+    __m256i va = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(a.lanes));
+    __m256i vb = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(b.lanes));
+    __m256i vr = _mm256_or_si256(va, vb);
+    VectorI32x8 r; _mm256_storeu_si256(reinterpret_cast<__m256i*>(r.lanes), vr); return r;
+}
+inline VectorI32x8 operator^(const VectorI32x8& a, const VectorI32x8& b) {
+    __m256i va = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(a.lanes));
+    __m256i vb = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(b.lanes));
+    __m256i vr = _mm256_xor_si256(va, vb);
+    VectorI32x8 r; _mm256_storeu_si256(reinterpret_cast<__m256i*>(r.lanes), vr); return r;
+}
+inline VectorI32x8 operator~(const VectorI32x8& a) {
+    __m256i va = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(a.lanes));
+    __m256i vr = _mm256_xor_si256(va, _mm256_set1_epi32(-1));
+    VectorI32x8 r; _mm256_storeu_si256(reinterpret_cast<__m256i*>(r.lanes), vr); return r;
+}
+inline VectorI32x8 operator==(const VectorI32x8& a, const VectorI32x8& b) {
+    __m256i va = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(a.lanes));
+    __m256i vb = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(b.lanes));
+    __m256i vr = _mm256_cmpeq_epi32(va, vb);
+    VectorI32x8 r; _mm256_storeu_si256(reinterpret_cast<__m256i*>(r.lanes), vr); return r;
+}
+inline VectorI32x8 operator!=(const VectorI32x8& a, const VectorI32x8& b) {
+    return ~(a == b);
+}
+inline VectorI32x8 operator<(const VectorI32x8& a, const VectorI32x8& b) {
+    __m256i va = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(a.lanes));
+    __m256i vb = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(b.lanes));
+    __m256i vr = _mm256_cmpgt_epi32(vb, va);
+    VectorI32x8 r; _mm256_storeu_si256(reinterpret_cast<__m256i*>(r.lanes), vr); return r;
+}
+inline VectorI32x8 operator>(const VectorI32x8& a, const VectorI32x8& b) {
+    __m256i va = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(a.lanes));
+    __m256i vb = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(b.lanes));
+    __m256i vr = _mm256_cmpgt_epi32(va, vb);
+    VectorI32x8 r; _mm256_storeu_si256(reinterpret_cast<__m256i*>(r.lanes), vr); return r;
+}
+inline VectorI32x8 operator<=(const VectorI32x8& a, const VectorI32x8& b) {
+    return ~(a > b);
+}
+inline VectorI32x8 operator>=(const VectorI32x8& a, const VectorI32x8& b) {
+    return ~(a < b);
+}
+
+inline VectorI64x4 operator+(const VectorI64x4& a, const VectorI64x4& b) {
+    __m256i va = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(a.lanes));
+    __m256i vb = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(b.lanes));
+    __m256i vr = _mm256_add_epi64(va, vb);
+    VectorI64x4 r; _mm256_storeu_si256(reinterpret_cast<__m256i*>(r.lanes), vr); return r;
+}
+inline VectorI64x4 operator-(const VectorI64x4& a, const VectorI64x4& b) {
+    __m256i va = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(a.lanes));
+    __m256i vb = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(b.lanes));
+    __m256i vr = _mm256_sub_epi64(va, vb);
+    VectorI64x4 r; _mm256_storeu_si256(reinterpret_cast<__m256i*>(r.lanes), vr); return r;
+}
+inline VectorI64x4 operator*(const VectorI64x4& a, const VectorI64x4& b) {
+    VectorI64x4 r;
+    for (int i = 0; i < 4; ++i) r.lanes[i] = a.lanes[i] * b.lanes[i];
+    return r;
+}
+inline VectorI64x4 operator&(const VectorI64x4& a, const VectorI64x4& b) {
+    __m256i va = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(a.lanes));
+    __m256i vb = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(b.lanes));
+    __m256i vr = _mm256_and_si256(va, vb);
+    VectorI64x4 r; _mm256_storeu_si256(reinterpret_cast<__m256i*>(r.lanes), vr); return r;
+}
+inline VectorI64x4 operator|(const VectorI64x4& a, const VectorI64x4& b) {
+    __m256i va = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(a.lanes));
+    __m256i vb = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(b.lanes));
+    __m256i vr = _mm256_or_si256(va, vb);
+    VectorI64x4 r; _mm256_storeu_si256(reinterpret_cast<__m256i*>(r.lanes), vr); return r;
+}
+inline VectorI64x4 operator^(const VectorI64x4& a, const VectorI64x4& b) {
+    __m256i va = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(a.lanes));
+    __m256i vb = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(b.lanes));
+    __m256i vr = _mm256_xor_si256(va, vb);
+    VectorI64x4 r; _mm256_storeu_si256(reinterpret_cast<__m256i*>(r.lanes), vr); return r;
+}
+inline VectorI64x4 operator~(const VectorI64x4& a) {
+    __m256i va = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(a.lanes));
+    __m256i vr = _mm256_xor_si256(va, _mm256_set1_epi64x(-1));
+    VectorI64x4 r; _mm256_storeu_si256(reinterpret_cast<__m256i*>(r.lanes), vr); return r;
+}
+inline VectorI64x4 operator==(const VectorI64x4& a, const VectorI64x4& b) {
+    __m256i va = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(a.lanes));
+    __m256i vb = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(b.lanes));
+    __m256i vr = _mm256_cmpeq_epi64(va, vb);
+    VectorI64x4 r; _mm256_storeu_si256(reinterpret_cast<__m256i*>(r.lanes), vr); return r;
+}
+inline VectorI64x4 operator!=(const VectorI64x4& a, const VectorI64x4& b) {
+    return ~(a == b);
+}
+inline VectorI64x4 operator<(const VectorI64x4& a, const VectorI64x4& b) {
+    __m256i va = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(a.lanes));
+    __m256i vb = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(b.lanes));
+    __m256i vr = _mm256_cmpgt_epi64(vb, va);
+    VectorI64x4 r; _mm256_storeu_si256(reinterpret_cast<__m256i*>(r.lanes), vr); return r;
+}
+inline VectorI64x4 operator>(const VectorI64x4& a, const VectorI64x4& b) {
+    __m256i va = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(a.lanes));
+    __m256i vb = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(b.lanes));
+    __m256i vr = _mm256_cmpgt_epi64(va, vb);
+    VectorI64x4 r; _mm256_storeu_si256(reinterpret_cast<__m256i*>(r.lanes), vr); return r;
+}
+inline VectorI64x4 operator<=(const VectorI64x4& a, const VectorI64x4& b) {
+    return ~(a > b);
+}
+inline VectorI64x4 operator>=(const VectorI64x4& a, const VectorI64x4& b) {
+    return ~(a < b);
 }

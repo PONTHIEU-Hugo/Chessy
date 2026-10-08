@@ -8,7 +8,7 @@
 int main()
 {
     Lexer lexer;
-    lexer.ReadFile(data.string() + "/code/main.chessy");
+    lexer.ReadFile(data.string() + "/code/compare.chessy");
     lexer.Tokenize();
     Parser parser;
     parser.Parse(lexer.GetTokens());

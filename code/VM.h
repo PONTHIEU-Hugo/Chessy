@@ -7,7 +7,7 @@
 
 using NativeFn = void(*)(class VM&, const ConstantContainer* arguments, u8 argc);
 
-constexpr size TABLE_COUNT = 14;
+constexpr size TABLE_COUNT = 16;
 
 inline static constexpr array<array<OperationPtr, TABLE_COUNT>, TABLE_COUNT> ADD_TABLE = CreateAddTable(
     std::make_index_sequence<TABLE_COUNT>{},

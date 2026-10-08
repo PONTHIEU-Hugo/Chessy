@@ -373,6 +373,8 @@ int Compiler::GetConstIndex(ConstantContainer& c)
             case ConstantType::_STRING:   equal = (existing.data.as_str && c.data.as_str && *existing.data.as_str == *c.data.as_str); break;
             case ConstantType::_BITBOARD: equal = (existing.data.as_bitboard == c.data.as_bitboard); break;
             case ConstantType::_MOVE:     equal = (existing.data.as_move == c.data.as_move); break;
+            case ConstantType::_I32x8: equal = (std::memcmp(&existing.data.as_i32x8, &c.data.as_i32x8, sizeof(VectorI32x8)) == 0); break;
+            case ConstantType::_I64x4: equal = (std::memcmp(&existing.data.as_i64x4, &c.data.as_i64x4, sizeof(VectorI64x4)) == 0); break;
             default: break;
         }
 

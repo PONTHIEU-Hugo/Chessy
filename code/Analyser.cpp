@@ -567,6 +567,16 @@ std::pair<bool,TokenType> Analyser::TypeInference(TokenType typeA, TokenType typ
                 {TokenType::_MOVE, TokenType::_MOVE},
             }
         },
+        {TokenType::_I32x8,
+            {
+                {TokenType::_I32x8, TokenType::_I32x8},
+            }
+        },
+        {TokenType::_I64x4,
+            {
+                {TokenType::_I64x4, TokenType::_I64x4},
+            }
+        },
     };
 
     auto it = typeInferenceMap.find(typeA);

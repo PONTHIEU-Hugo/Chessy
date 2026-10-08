@@ -118,25 +118,35 @@ ConstantContainer Mod(const ConstantContainer& rLeft, const ConstantContainer& r
 template <ConstantType LType, ConstantType RType>
 ConstantContainer Pow(const ConstantContainer& rLeft, const ConstantContainer& rRight)
 {
-    using TLeft = ConstantTrait<LType>::cpp;
-    using TRight = ConstantTrait<RType>::cpp;
-
-    TLeft left = ConstantTrait<LType>::get(rLeft);
-    TRight right = ConstantTrait<RType>::get(rRight);
-
-    if constexpr(requires{ left * right; })
+    if constexpr (LType == ConstantType::_I32x8 || LType == ConstantType::_I64x4 ||
+                  RType == ConstantType::_I32x8 || RType == ConstantType::_I64x4)
     {
-        auto result = left * right;
-        for(int i = 0; i < right - 1; i++)
-            result *= right;
-
-        using resultType = decltype(result);
-        return ConstantTrait<ToEnum<resultType>::value>::make(result);
+        std::cout << "Pow not supported for vector types" << std::endl;
+        exit(409);
     }
     else
     {
-        std::cout << "Pow between: " << static_cast<int>(LType) << " and: " << static_cast<int>(RType) << " doesn't exist" << std::endl;
-        exit(409);
+        using TLeft = typename ConstantTrait<LType>::cpp;
+        using TRight = typename ConstantTrait<RType>::cpp;
+
+        TLeft left = ConstantTrait<LType>::get(rLeft);
+        TRight right = ConstantTrait<RType>::get(rRight);
+
+        if constexpr(requires{ left * right; })
+        {
+            auto result = left * right;
+            for(int i = 0; i < right - 1; i++)
+                result *= right;
+
+            using resultType = decltype(result);
+            return ConstantTrait<ToEnum<resultType>::value>::make(result);
+        }
+        else
+        {
+            std::cout << "Pow between: " << static_cast<int>(LType)
+                      << " and: " << static_cast<int>(RType) << " doesn't exist" << std::endl;
+            exit(409);
+        }
     }
 }
 
@@ -440,4 +450,16 @@ template <>
 inline ConstantContainer Not<ConstantType::_BOOL>(const ConstantContainer& rLeft)
 {
     return ConstantTrait<ConstantType::_BOOL>::make(!rLeft.data.as_bool);
+}
+
+inline VectorI32x8 operator-(const VectorI32x8& a) {
+    __m256i va = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(a.lanes));
+    __m256i vr = _mm256_sub_epi32(_mm256_setzero_si256(), va);
+    VectorI32x8 r; _mm256_storeu_si256(reinterpret_cast<__m256i*>(r.lanes), vr); return r;
+}
+
+inline VectorI64x4 operator-(const VectorI64x4& a) {
+    __m256i va = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(a.lanes));
+    __m256i vr = _mm256_sub_epi64(_mm256_setzero_si256(), va);
+    VectorI64x4 r; _mm256_storeu_si256(reinterpret_cast<__m256i*>(r.lanes), vr); return r;
 }

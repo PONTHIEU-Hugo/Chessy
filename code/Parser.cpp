@@ -4,6 +4,7 @@ un_set<TokenType> Parser::s_typeTokens = {
     TokenType::_BOOL, TokenType::_STRING_IDENTIFIER,
     TokenType::_I8, TokenType::_I16, TokenType::_I32, TokenType::_I64,
     TokenType::_U8, TokenType::_U16, TokenType::_U32, TokenType::_U64,
+    TokenType::_I32x8, TokenType::_I64x4,
     TokenType::_BITBOARD, TokenType::_PIECE,
     TokenType::_SQUARE, TokenType::_MOVE,
     TokenType::_BOARD,

@@ -36,6 +36,8 @@ REGISTER_TYPE(ConstantType::_U8, u8, as_u8)
 REGISTER_TYPE(ConstantType::_U16, u16, as_u16)
 REGISTER_TYPE(ConstantType::_U32, u32, as_u32)
 REGISTER_TYPE(ConstantType::_U64, u64, as_u64)
+REGISTER_TYPE(ConstantType::_I32x8, VectorI32x8, as_i32x8)
+REGISTER_TYPE(ConstantType::_I64x4, VectorI64x4, as_i64x4)
 
 REGISTER_TYPE(ConstantType::_STRING, str*, as_str)
 
@@ -68,6 +70,8 @@ TO_ENUM(ConstantType::_U8, u8)
 TO_ENUM(ConstantType::_U16, u16)
 TO_ENUM(ConstantType::_U32, u32)
 TO_ENUM(ConstantType::_U64, u64)
+TO_ENUM(ConstantType::_I32x8, VectorI32x8)
+TO_ENUM(ConstantType::_I64x4, VectorI64x4)
 
 TO_ENUM(ConstantType::_STRING, str*)
 

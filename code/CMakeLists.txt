@@ -21,3 +21,9 @@ target_link_libraries(Chessy_Lexer PRIVATE chessy_core)
 set_target_properties(Chessy_Lexer PROPERTIES
     VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}"
 )
+
+if(MSVC)
+    target_compile_options(chessy_core PUBLIC /arch:AVX2)
+else()
+    target_compile_options(chessy_core PUBLIC -mavx2)
+endif()

@@ -445,6 +445,20 @@ void InvokeNativeImpl(u8 nativeIndex, const char* name, VM& vm, const ConstantCo
             std::cout << std::endl;
             break;
         }
+        case ConstantType::_I32x8:
+        {
+            std::cout << "[";
+            for (int i = 0; i < 8; i++) { if (i) std::cout << ", "; std::cout << value.data.as_i32x8.lanes[i]; }
+            std::cout << "]" << std::endl;
+            break;
+        }
+        case ConstantType::_I64x4:
+        {
+            std::cout << "[";
+            for (int i = 0; i < 4; i++) { if (i) std::cout << ", "; std::cout << value.data.as_i64x4.lanes[i]; }
+            std::cout << "]" << std::endl;
+            break;
+        }
         default: std::cout << "?" << std::endl; break;
         }
         return;
@@ -668,6 +682,112 @@ void InvokeNativeImpl(u8 nativeIndex, const char* name, VM& vm, const ConstantCo
     case 45: // GenerateCaptures
         GenerateCapturesInternal(vm);
         return;
+    case 46: 
+    {
+        VectorI32x8 v;
+        for (int i = 0; i < 8; i++) v.lanes[i] = arguments[i].data.as_i32;
+        vm.Register(0) = ConstantTrait<ConstantType::_I32x8>::make(v);
+        return;
+    }
+    case 47:
+    {
+        VectorI64x4 v;
+        for (int i = 0; i < 4; i++) v.lanes[i] = arguments[i].data.as_i64;
+        vm.Register(0) = ConstantTrait<ConstantType::_I64x4>::make(v);
+        return;
+    }
+    case 48:
+    {
+        VectorI32x8 v;
+        for (int i = 0; i < 8; i++) v.lanes[i] = arguments[0].data.as_i32;
+        vm.Register(0) = ConstantTrait<ConstantType::_I32x8>::make(v);
+        return;
+    }
+    case 49:
+    {
+        VectorI64x4 v;
+        for (int i = 0; i < 4; i++) v.lanes[i] = arguments[0].data.as_i64;
+        vm.Register(0) = ConstantTrait<ConstantType::_I64x4>::make(v);
+        return;
+    }
+        case 50: 
+    {
+        VectorI64x4 v;
+        v.lanes[0] = static_cast<i64>(arguments[0].data.as_bitboard.board);
+        v.lanes[1] = static_cast<i64>(arguments[1].data.as_bitboard.board);
+        v.lanes[2] = static_cast<i64>(arguments[2].data.as_bitboard.board);
+        v.lanes[3] = static_cast<i64>(arguments[3].data.as_bitboard.board);
+        vm.Register(0) = ConstantTrait<ConstantType::_I64x4>::make(v);
+        return;
+    }
+    case 51: 
+    {
+        i32 idx = arguments[1].data.as_i32;
+        if (idx < 0 || idx > 3) { vm.Register(0) = ConstantTrait<ConstantType::_BITBOARD>::make(Bitboard{0}); return; }
+        vm.Register(0) = ConstantTrait<ConstantType::_BITBOARD>::make(
+            Bitboard{ static_cast<u64>(arguments[0].data.as_i64x4.lanes[idx]) });
+        return;
+    }
+    case 52: 
+    {
+        __m256i a = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(arguments[0].data.as_i64x4.lanes));
+        __m256i b = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(arguments[1].data.as_i64x4.lanes));
+        __m256i r = _mm256_and_si256(a, b);
+        VectorI64x4 out;
+        _mm256_storeu_si256(reinterpret_cast<__m256i*>(out.lanes), r);
+        vm.Register(0) = ConstantTrait<ConstantType::_I64x4>::make(out);
+        return;
+    }
+    case 53: 
+    {
+        __m256i a = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(arguments[0].data.as_i64x4.lanes));
+        __m256i b = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(arguments[1].data.as_i64x4.lanes));
+        __m256i r = _mm256_or_si256(a, b);
+        VectorI64x4 out;
+        _mm256_storeu_si256(reinterpret_cast<__m256i*>(out.lanes), r);
+        vm.Register(0) = ConstantTrait<ConstantType::_I64x4>::make(out);
+        return;
+    }
+    case 54: 
+    {
+        __m256i a = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(arguments[0].data.as_i64x4.lanes));
+        __m256i b = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(arguments[1].data.as_i64x4.lanes));
+        __m256i r = _mm256_xor_si256(a, b);
+        VectorI64x4 out;
+        _mm256_storeu_si256(reinterpret_cast<__m256i*>(out.lanes), r);
+        vm.Register(0) = ConstantTrait<ConstantType::_I64x4>::make(out);
+        return;
+    }
+    case 55:
+    {
+        __m256i x = _mm256_loadu_si256(reinterpret_cast<const __m256i*>(arguments[0].data.as_i64x4.lanes));
+
+        const __m256i m1 = _mm256_set1_epi64x(0x5555555555555555LL);
+        const __m256i m2 = _mm256_set1_epi64x(0x3333333333333333LL);
+        const __m256i m4 = _mm256_set1_epi64x(0x0F0F0F0F0F0F0F0FLL);
+
+        x = _mm256_sub_epi64(x, _mm256_and_si256(_mm256_srli_epi64(x, 1), m1));
+        x = _mm256_add_epi64(
+                _mm256_and_si256(x, m2),
+                _mm256_and_si256(_mm256_srli_epi64(x, 2), m2));
+        x = _mm256_and_si256(
+                _mm256_add_epi64(x, _mm256_srli_epi64(x, 4)),
+                m4);
+        x = _mm256_sad_epu8(x, _mm256_setzero_si256());
+
+        VectorI64x4 out;
+        _mm256_storeu_si256(reinterpret_cast<__m256i*>(out.lanes), x);
+        vm.Register(0) = ConstantTrait<ConstantType::_I64x4>::make(out);
+        return;
+    }
+    case 56: 
+    {
+        i32 idx = arguments[1].data.as_i32;
+        if (idx < 0 || idx > 3) { vm.Register(0) = ConstantTrait<ConstantType::_I32>::make(0); return; }
+        vm.Register(0) = ConstantTrait<ConstantType::_I32>::make(
+            static_cast<i32>(arguments[0].data.as_i64x4.lanes[idx]));
+        return;
+    }
 
     default:
         std::cout << "Unknown builtin index: " << static_cast<int>(nativeIndex) << std::endl;
