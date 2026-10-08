@@ -441,6 +441,21 @@ void InvokeNativeImpl(u8 nativeIndex, const char* name, VM& vm, const ConstantCo
         case ConstantType::_U32:    std::cout << value.data.as_u32 << std::endl; break;
         case ConstantType::_U64:    std::cout << value.data.as_u64 << std::endl; break;
         case ConstantType::_BITBOARD: std::cout << value.data.as_bitboard.board << std::endl; break;
+        case ConstantType::_MOVE:
+        {
+            const Move& m = value.data.as_move;
+            std::cout
+                << static_cast<char>('a' + (m.from & 7))
+                << static_cast<char>('1' + (m.from >> 3))
+                << static_cast<char>('a' + (m.to & 7))
+                << static_cast<char>('1' + (m.to >> 3));
+            if (m.flags & MoveFlagCapture)   std::cout << " capture";
+            if (m.flags & MoveFlagPromotion) std::cout << " promo";
+            if (m.flags & MoveFlagCastle)    std::cout << " castle";
+            if (m.flags & MoveFlagEnPassant) std::cout << " ep";
+            std::cout << std::endl;
+            break;
+        }
         default: std::cout << "?" << std::endl; break;
         }
         return;
@@ -462,6 +477,81 @@ void InvokeNativeImpl(u8 nativeIndex, const char* name, VM& vm, const ConstantCo
     if (nameView == "BishopAttacks") { vm.Register(0) = ConstantTrait<ConstantType::_BITBOARD>::make(Bitboard{ ComputeBishopAttacks(arguments[0].data.as_square.index, arguments[1].data.as_bitboard.board) }); return; }
     if (nameView == "RookAttacks") { vm.Register(0) = ConstantTrait<ConstantType::_BITBOARD>::make(Bitboard{ ComputeRookAttacks(arguments[0].data.as_square.index, arguments[1].data.as_bitboard.board) }); return; }
     if (nameView == "QueenAttacks") { u64 attacks = ComputeBishopAttacks(arguments[0].data.as_square.index, arguments[1].data.as_bitboard.board) | ComputeRookAttacks(arguments[0].data.as_square.index, arguments[1].data.as_bitboard.board); vm.Register(0) = ConstantTrait<ConstantType::_BITBOARD>::make(Bitboard{ attacks }); return; }
+
+    if (nameView == "SortCapturesFirst")
+    {
+        vector<Move>& moveList = vm.GetCurrentMoveList();
+        std::partition(moveList.begin(), moveList.end(),
+            [](const Move& m) {
+                return (m.flags & MoveFlagCapture) != 0
+                    || (m.flags & MoveFlagPromotion) != 0;
+            });
+        return;
+    }
+
+    if (nameView == "PrintBoard")
+    {
+        Board& board = vm.GetBoard();
+        static const char pieceChars[12] = { 'P','N','B','R','Q','K','p','n','b','r','q','k' };
+        std::cout << std::endl;
+        std::cout << "  +-----------------+" << std::endl;
+        for (int rank = 7; rank >= 0; rank--)
+        {
+            std::cout << " " << (rank + 1) << "| ";
+            for (int file = 0; file < 8; file++)
+            {
+                u8 square = static_cast<u8>(rank * 8 + file);
+                u64 bit = 1ULL << square;
+                char c = '.';
+                for (int p = 0; p < 12; p++)
+                {
+                    if (board.pieces[p] & bit) { c = pieceChars[p]; break; }
+                }
+                std::cout << c << ' ';
+            }
+            std::cout << "|" << std::endl;
+        }
+        std::cout << "  +-----------------+" << std::endl;
+        std::cout << "    a b c d e f g h" << std::endl;
+        std::cout << "Side: " << (board.sideToMove == Color::White ? "White" : "Black") << std::endl;
+        return;
+    }
+
+    if (nameView == "ReadInt")
+    {
+        i32 value = 0;
+        std::cin >> value;
+        vm.Register(0) = ConstantTrait<ConstantType::_I32>::make(value);
+        return;
+    }
+
+    if (nameView == "ReadMove")
+    {
+        std::string input;
+        std::cin >> input;
+        Move m = { 0, 0, MoveFlagNone };
+        if (input.size() >= 4)
+        {
+            u8 fromFile = static_cast<u8>(input[0] - 'a');
+            u8 fromRank = static_cast<u8>(input[1] - '1');
+            u8 toFile   = static_cast<u8>(input[2] - 'a');
+            u8 toRank   = static_cast<u8>(input[3] - '1');
+            m.from = static_cast<u8>(fromRank * 8 + fromFile);
+            m.to   = static_cast<u8>(toRank * 8 + toFile);
+
+            Board& board = vm.GetBoard();
+            u64 toBit = 1ULL << m.to;
+            if (board.occupancy[static_cast<u8>(OppositeColor(board.sideToMove))] & toBit)
+                m.flags |= MoveFlagCapture;
+        }
+        vm.Register(0) = ConstantTrait<ConstantType::_MOVE>::make(m);
+        return;
+    }
+    if (nameView == "NullMove")
+    {
+        vm.Register(0) = ConstantTrait<ConstantType::_MOVE>::make(Move{ 0, 0, 0 });
+        return;
+    }
 
     if (nameView == "NewBoard")
     {

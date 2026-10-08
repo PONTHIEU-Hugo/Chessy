@@ -42,6 +42,13 @@ inline const std::vector<BuiltinDesc>& GetBuiltins()
         { "Occupancy",        1, true,  TokenType::_BITBOARD,  { TokenType::_I32 } },
         { "KingSquare",       1, true,  TokenType::_SQUARE,  { TokenType::_I32 } },
 
+        { "SortCapturesFirst", 0, false, TokenType::_DEFAULT, { } },
+
+        { "PrintBoard",        0, false, TokenType::_DEFAULT, { } },
+        { "ReadInt",           0, true,  TokenType::_I32,     { } },
+        { "ReadMove",          0, true,  TokenType::_MOVE,    { } },
+        { "NullMove",          0, true,  TokenType::_MOVE,    { } },
+
         { "Generate",         0, false, TokenType::_DEFAULT,   { } },
         { "MoveCount",        0, true,  TokenType::_I32,       { } },
         { "MoveAt",           1, true,  TokenType::_MOVE,      { TokenType::_I32 } },
