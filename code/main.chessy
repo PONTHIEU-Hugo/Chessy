@@ -136,7 +136,6 @@ func Main() {
     I32 running = 1;
     do {
         PrintBoard();
-        Print(0);
 
         I32 choice = ReadInt();
 
@@ -144,19 +143,16 @@ func Main() {
             running = 0;
         }
         if (choice == 1) {
-            Print(1);
-            Move best = FindBestMove(4);
-            Print(best);
-            MakeMove(best);
-        }
-        if (choice == 2) {
-            Print(2);
             Move best = FindBestMove(5);
             Print(best);
             MakeMove(best);
         }
+        if (choice == 2) {
+            Move best = FindBestMove(6);
+            Print(best);
+            MakeMove(best);
+        }
         if (choice == 3) {
-            Print(3);
             Move m = ReadMove();
             Print(m);
             MakeMove(m);
